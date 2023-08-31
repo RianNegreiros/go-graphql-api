@@ -54,3 +54,30 @@ func (s *AuthService) Register(ctx context.Context, input internal.RegisterInput
 		User:        user,
 	}, nil
 }
+
+func (s *AuthService) Login(ctx context.Context, input internal.LoginInput) (internal.AuthResponse, error) {
+	input.Sanitize()
+
+	if err := input.Validate(); err != nil {
+		return internal.AuthResponse{}, err
+	}
+
+	user, err := s.UserRepo.GetByEmail(ctx, input.Email)
+	if err != nil {
+		switch {
+		case errors.Is(err, internal.ErrNotFound):
+			return internal.AuthResponse{}, internal.ErrBadCredentials
+		default:
+			return internal.AuthResponse{}, err
+		}
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+		return internal.AuthResponse{}, internal.ErrBadCredentials
+	}
+
+	return internal.AuthResponse{
+		AccessToken: "access_token",
+		User:        user,
+	}, nil
+}

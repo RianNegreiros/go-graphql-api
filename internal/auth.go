@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	ErrValidation = errors.New("validation error")
-	ErrNotFound   = errors.New("not found")
+	ErrBadCredentials = errors.New("invalid email or password")
+	ErrValidation     = errors.New("validation error")
+	ErrNotFound       = errors.New("not found")
 )
 
 var (
@@ -20,6 +21,30 @@ var (
 
 type AuthService interface {
 	Register(ctx context.Context, input RegisterInput) (AuthResponse, error)
+	Login(ctx context.Context, input LoginInput) (AuthResponse, error)
+}
+
+type LoginInput struct {
+	Email    string
+	Password string
+}
+
+func (i *LoginInput) Sanitize() {
+	i.Email = strings.TrimSpace(i.Email)
+	i.Email = strings.ToLower(i.Email)
+	i.Password = strings.TrimSpace(i.Password)
+}
+
+func (i LoginInput) Validate() error {
+	if _, err := mail.ParseAddress(i.Email); err != nil {
+		return fmt.Errorf("%w: invalid email address", ErrValidation)
+	}
+
+	if len(i.Password) < PasswordMinLength {
+		return fmt.Errorf("%w: password required", ErrValidation)
+	}
+
+	return nil
 }
 
 type RegisterInput struct {
