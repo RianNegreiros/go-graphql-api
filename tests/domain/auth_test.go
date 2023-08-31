@@ -48,5 +48,6 @@ func TestAuthService_Register(t *testing.T) {
 		require.Equal(t, validInput.Email, res.User.Email)
 		require.NotEmpty(t, res.User.Password)
 
+		userRepo.AssertExpectations(t)
 	})
 }
