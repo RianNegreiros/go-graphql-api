@@ -2,13 +2,21 @@ package db
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/RianNegreiros/go-graphql-api/config"
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
+	"runtime"
+
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 type DB struct {
-	Pool *pgxpool.Pool
+	Pool   *pgxpool.Pool
+	config *config.Config
 }
 
 func New(ctx context.Context, config *config.Config) *DB {
@@ -23,7 +31,8 @@ func New(ctx context.Context, config *config.Config) *DB {
 	}
 
 	db := &DB{
-		Pool: pool,
+		Pool:   pool,
+		config: config,
 	}
 
 	db.Ping(ctx)
@@ -41,4 +50,23 @@ func (db *DB) Ping(ctx context.Context) {
 
 func (db *DB) Close() {
 	db.Pool.Close()
+}
+
+func (db *DB) Migrate() error {
+	_, _, _, _ = runtime.Caller(0)
+
+	migrationPath := fmt.Sprintf("file://internal/db/migrations")
+
+	m, err := migrate.New(migrationPath, db.config.Database.URL)
+	if err != nil {
+		return fmt.Errorf("error creating migration instance: %w", err)
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		return fmt.Errorf("error running migrations: %w", err)
+	}
+
+	log.Println("migrations ran successfully")
+
+	return nil
 }
