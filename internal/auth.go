@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	ErrBadCredentials = errors.New("invalid email or password")
-	ErrValidation     = errors.New("validation error")
-	ErrNotFound       = errors.New("not found")
+	ErrInvalidCredentials = errors.New("invalid email or password")
+	ErrValidation         = errors.New("validation error")
+	ErrNotFound           = errors.New("not found")
 )
 
 var (

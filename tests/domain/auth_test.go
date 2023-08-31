@@ -163,4 +163,20 @@ func TestAuthService_Login(t *testing.T) {
 
 		userRepo.AssertExpectations(t)
 	})
+
+	t.Run("invalid email", func(t *testing.T) {
+		ctx := context.Background()
+
+		userRepo := &mocks.UserRepo{}
+
+		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
+			Return(internal.User{}, internal.ErrNotFound)
+
+		service := domain.NewAuthService(userRepo)
+
+		_, err := service.Login(ctx, validInput)
+		require.ErrorIs(t, err, internal.ErrInvalidCredentials)
+
+		userRepo.AssertExpectations(t)
+	})
 }

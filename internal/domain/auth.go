@@ -66,14 +66,14 @@ func (s *AuthService) Login(ctx context.Context, input internal.LoginInput) (int
 	if err != nil {
 		switch {
 		case errors.Is(err, internal.ErrNotFound):
-			return internal.AuthResponse{}, internal.ErrBadCredentials
+			return internal.AuthResponse{}, internal.ErrInvalidCredentials
 		default:
 			return internal.AuthResponse{}, err
 		}
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		return internal.AuthResponse{}, internal.ErrBadCredentials
+		return internal.AuthResponse{}, internal.ErrInvalidCredentials
 	}
 
 	return internal.AuthResponse{
