@@ -1,16 +1,16 @@
-package http
+package internal
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/RianNegreiros/go-graphql-api/internal"
 	"net/mail"
 	"strings"
 )
 
 var (
 	ErrValidation = errors.New("validation error")
+	ErrNotFound   = errors.New("not found")
 )
 
 var (
@@ -31,7 +31,7 @@ type RegisterInput struct {
 
 type AuthResponse struct {
 	AccessToken string
-	User        internal.User
+	User        User
 }
 
 func (r RegisterInput) Validate() error {

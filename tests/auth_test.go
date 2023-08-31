@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"github.com/RianNegreiros/go-graphql-api/internal/transport/http"
+	"github.com/RianNegreiros/go-graphql-api/internal"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -9,12 +9,12 @@ import (
 func TestRegisterInput_Validate(t *testing.T) {
 	testCases := []struct {
 		name  string
-		input http.RegisterInput
+		input internal.RegisterInput
 		err   error
 	}{
 		{
 			name: "valid input",
-			input: http.RegisterInput{
+			input: internal.RegisterInput{
 				Username:        "john",
 				Email:           "johndoe@mail.com",
 				Password:        "123456",
@@ -24,40 +24,40 @@ func TestRegisterInput_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid email",
-			input: http.RegisterInput{
+			input: internal.RegisterInput{
 				Username:        "john",
 				Email:           "john",
 				Password:        "123456",
 				ConfirmPassword: "123456",
 			},
-			err: http.ErrValidation,
+			err: internal.ErrValidation,
 		}, {
 			name: "invalid username",
-			input: http.RegisterInput{
+			input: internal.RegisterInput{
 				Username:        "j",
 				Email:           "johndoe@mail.com",
 				Password:        "123456",
 				ConfirmPassword: "123456",
 			},
-			err: http.ErrValidation,
+			err: internal.ErrValidation,
 		}, {
 			name: "invalid password",
-			input: http.RegisterInput{
+			input: internal.RegisterInput{
 				Username:        "john",
 				Email:           "johndoe@mail.com",
 				Password:        "12345",
 				ConfirmPassword: "12345",
 			},
-			err: http.ErrValidation,
+			err: internal.ErrValidation,
 		}, {
 			name: "password and confirm password don't match",
-			input: http.RegisterInput{
+			input: internal.RegisterInput{
 				Username:        "john",
 				Email:           "johndoe@mail.com",
 				Password:        "123456",
 				ConfirmPassword: "1234567",
 			},
-			err: http.ErrValidation,
+			err: internal.ErrValidation,
 		},
 	}
 
@@ -74,14 +74,14 @@ func TestRegisterInput_Validate(t *testing.T) {
 }
 
 func TestRegisterInput_Sanitize(t *testing.T) {
-	input := http.RegisterInput{
+	input := internal.RegisterInput{
 		Username:        "  john  ",
 		Email:           "  JOHNDOE@mail.com ",
 		Password:        " 123456 ",
 		ConfirmPassword: " 123456 ",
 	}
 
-	want := http.RegisterInput{
+	want := internal.RegisterInput{
 		Username:        "john",
 		Email:           "johndoe@mail.com",
 		Password:        "123456",
