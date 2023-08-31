@@ -137,3 +137,19 @@ func TestLoginInput_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestLoginInput_Sanitize(t *testing.T) {
+	input := internal.LoginInput{
+		Email:    "   JOHNDOE@mail.com   ",
+		Password: " 123456 ",
+	}
+
+	want := internal.LoginInput{
+		Email:    "johndoe@mail.com",
+		Password: "123456",
+	}
+
+	input.Sanitize()
+
+	require.Equal(t, want, input)
+}
