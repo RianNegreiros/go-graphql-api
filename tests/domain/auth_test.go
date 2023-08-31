@@ -195,5 +195,17 @@ func TestAuthService_Login(t *testing.T) {
 
 		userRepo.AssertExpectations(t)
 	})
-	
+
+	t.Run("invalid input", func(t *testing.T) {
+		ctx := context.Background()
+
+		userRepo := &mocks.UserRepo{}
+
+		service := domain.NewAuthService(userRepo)
+
+		_, err := service.Login(ctx, internal.LoginInput{})
+		require.ErrorIs(t, err, internal.ErrValidation)
+
+		userRepo.AssertNotCalled(t, "GetByEmail")
+	})
 }
