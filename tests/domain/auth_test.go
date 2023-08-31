@@ -110,4 +110,20 @@ func TestAuthService_Register(t *testing.T) {
 
 		userRepo.AssertExpectations(t)
 	})
+
+	t.Run("invalid input", func(t *testing.T) {
+		ctx := context.Background()
+
+		userRepo := &mocks.UserRepo{}
+
+		service := domain.NewAuthService(userRepo)
+
+		_, err := service.Register(ctx, internal.RegisterInput{})
+		require.Error(t, err)
+
+		userRepo.AssertNotCalled(t, "GetByUsername")
+		userRepo.AssertNotCalled(t, "GetByEmail")
+		userRepo.AssertNotCalled(t, "Create")
+		userRepo.AssertExpectations(t)
+	})
 }
