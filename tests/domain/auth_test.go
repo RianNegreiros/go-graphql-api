@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"github.com/RianNegreiros/go-graphql-api/internal"
 	"github.com/RianNegreiros/go-graphql-api/internal/domain"
 	mocks "github.com/RianNegreiros/go-graphql-api/mocks/internal_"
@@ -85,6 +86,28 @@ func TestAuthService_Register(t *testing.T) {
 		require.ErrorIs(t, err, internal.ErrEmailTaken)
 
 		userRepo.AssertNotCalled(t, "Create")
+		userRepo.AssertExpectations(t)
+	})
+
+	t.Run("error creating user", func(t *testing.T) {
+		ctx := context.Background()
+
+		userRepo := &mocks.UserRepo{}
+
+		userRepo.On("GetByUsername", mock.Anything, mock.Anything).
+			Return(internal.User{}, internal.ErrNotFound)
+
+		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
+			Return(internal.User{}, internal.ErrNotFound)
+
+		userRepo.On("Create", mock.Anything, mock.Anything).
+			Return(internal.User{}, errors.New("some error"))
+
+		service := domain.NewAuthService(userRepo)
+
+		_, err := service.Register(ctx, validInput)
+		require.Error(t, err)
+
 		userRepo.AssertExpectations(t)
 	})
 }
