@@ -8,6 +8,7 @@ import (
 	mocks "github.com/RianNegreiros/go-graphql-api/mocks/internal_"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
 	"testing"
 )
 
@@ -124,6 +125,42 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo.AssertNotCalled(t, "GetByUsername")
 		userRepo.AssertNotCalled(t, "GetByEmail")
 		userRepo.AssertNotCalled(t, "Create")
+		userRepo.AssertExpectations(t)
+	})
+}
+
+func TestAuthService_Login(t *testing.T) {
+	validInput := internal.LoginInput{
+		Email:    "johndoe@mail.com",
+		Password: "hashed_password",
+	}
+
+	t.Run("valid input", func(t *testing.T) {
+		ctx := context.Background()
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(validInput.Password), bcrypt.DefaultCost)
+		require.NoError(t, err)
+
+		userRepo := &mocks.UserRepo{}
+
+		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
+			Return(internal.User{
+				ID:       "user_id",
+				Username: "john",
+				Email:    validInput.Email,
+				Password: string(hashedPassword),
+			}, nil)
+
+		service := domain.NewAuthService(userRepo)
+
+		res, err := service.Login(ctx, validInput)
+		require.NoError(t, err)
+
+		require.NotEmpty(t, res.AccessToken)
+		require.NotEmpty(t, res.User.ID)
+		require.NotEmpty(t, res.User.Username)
+		require.Equal(t, validInput.Email, res.User.Email)
+
 		userRepo.AssertExpectations(t)
 	})
 }
