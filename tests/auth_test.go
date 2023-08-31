@@ -92,3 +92,48 @@ func TestRegisterInput_Sanitize(t *testing.T) {
 
 	require.Equal(t, want, input)
 }
+
+func TestLoginInput_Validate(t *testing.T) {
+	testCases := []struct {
+		name  string
+		input internal.LoginInput
+		err   error
+	}{
+		{
+			name: "valid input",
+			input: internal.LoginInput{
+				Email:    "johndoe@mail.com",
+				Password: "123456",
+			},
+			err: nil,
+		},
+		{
+			name: "invalid email",
+			input: internal.LoginInput{
+				Email:    "invalid_email",
+				Password: "123456",
+			},
+			err: internal.ErrValidation,
+		},
+		{
+			name: "password required",
+			input: internal.LoginInput{
+				Email:    "johndoe@mail.com",
+				Password: "",
+			},
+			err: internal.ErrValidation,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.input.Validate()
+
+			if tc.err != nil {
+				require.ErrorIs(t, err, tc.err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
