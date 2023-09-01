@@ -1,8 +1,10 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"os"
+	"regexp"
+
+	"github.com/joho/godotenv"
 )
 
 type database struct {
@@ -13,9 +15,18 @@ type Config struct {
 	Database database
 }
 
-func New() *Config {
-	godotenv.Load()
+func LoadEnv(fileName string) {
+	re := regexp.MustCompile(`^(.*` + "go-graphql-api" + `)`)
+	cwd, _ := os.Getwd()
+	rootPath := re.Find([]byte(cwd))
 
+	err := godotenv.Load(string(rootPath) + "/" + fileName)
+	if err != nil {
+		godotenv.Load()
+	}
+}
+
+func New() *Config {
 	return &Config{
 		Database: database{
 			URL: os.Getenv("DATABASE_URL"),

@@ -1,14 +1,16 @@
-package db
+package postgres
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"path"
+	"runtime"
+
 	"github.com/RianNegreiros/go-graphql-api/config"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"log"
-	"runtime"
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -22,7 +24,7 @@ type DB struct {
 func New(ctx context.Context, config *config.Config) *DB {
 	dbConfig, err := pgxpool.ParseConfig(config.Database.URL)
 	if err != nil {
-		log.Fatalf("error loading db config: %v", err)
+		log.Fatalf("error loading postgres config: %v", err)
 	}
 
 	pool, err := pgxpool.NewWithConfig(ctx, dbConfig)
@@ -42,7 +44,7 @@ func New(ctx context.Context, config *config.Config) *DB {
 
 func (db *DB) Ping(ctx context.Context) {
 	if err := db.Pool.Ping(ctx); err != nil {
-		log.Fatalf("error pinging db: %v", err)
+		log.Fatalf("error pinging postgres: %v", err)
 	}
 
 	log.Println("connected to postgres")
@@ -53,9 +55,9 @@ func (db *DB) Close() {
 }
 
 func (db *DB) Migrate() error {
-	_, _, _, _ = runtime.Caller(0)
+	_, b, _, _ := runtime.Caller(0)
 
-	migrationPath := fmt.Sprintf("file://internal/db/migrations")
+	migrationPath := fmt.Sprintf("file:///%s/migrations", path.Dir(b))
 
 	m, err := migrate.New(migrationPath, db.config.Database.URL)
 	if err != nil {
@@ -67,6 +69,34 @@ func (db *DB) Migrate() error {
 	}
 
 	log.Println("migrations ran successfully")
+
+	return nil
+}
+
+func (db *DB) Drop() error {
+	_, b, _, _ := runtime.Caller(0)
+
+	migrationPath := fmt.Sprintf("file:///%s/migrations", path.Dir(b))
+
+	m, err := migrate.New(migrationPath, db.config.Database.URL)
+	if err != nil {
+		return fmt.Errorf("error creating migration instance: %w", err)
+	}
+
+	if err := m.Drop(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		return fmt.Errorf("error dropping migrations: %w", err)
+	}
+
+	log.Println("migrations dropped successfully")
+
+	return nil
+}
+
+func (db *DB) Truncate(ctx context.Context) error {
+	_, err := db.Pool.Exec(ctx, `DELETE FROM users;`)
+	if err != nil {
+		return fmt.Errorf("error truncating users table: %w", err)
+	}
 
 	return nil
 }

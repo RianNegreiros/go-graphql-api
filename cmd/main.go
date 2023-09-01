@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/RianNegreiros/go-graphql-api/config"
-	"github.com/RianNegreiros/go-graphql-api/internal/db"
+	"github.com/RianNegreiros/go-graphql-api/internal/postgres"
 	"log"
 )
 
@@ -12,9 +12,9 @@ func main() {
 
 	config := config.New()
 
-	db := db.New(ctx, config)
+	db := postgres.New(ctx, config)
 
 	if err := db.Migrate(); err != nil {
-		log.Fatalf("error migrating db: %v", err)
+		log.Fatalf("error migrating postgres: %v", err)
 	}
 }

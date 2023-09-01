@@ -1,8 +1,9 @@
-package db
+package postgres
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/RianNegreiros/go-graphql-api/internal"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
@@ -10,6 +11,12 @@ import (
 
 type UserRepo struct {
 	DB *DB
+}
+
+func NewUserRepo(db *DB) *UserRepo {
+	return &UserRepo{
+		DB: db,
+	}
 }
 
 func (r *UserRepo) Create(ctx context.Context, user internal.User) (internal.User, error) {
@@ -41,11 +48,11 @@ func createUser(ctx context.Context, tx pgx.Tx, user internal.User) (internal.Us
 
 	u := internal.User{}
 
-	if err := pgxscan.Get(ctx, tx, &u, query); err != nil {
+	if err := pgxscan.Get(ctx, tx, &u, query, user.Username, user.Email, user.Password); err != nil {
 		return internal.User{}, fmt.Errorf("error creating user: %w", err)
 	}
 
-	return user, nil
+	return u, nil
 }
 
 func (r *UserRepo) GetByUsername(ctx context.Context, username string) (internal.User, error) {
