@@ -1,0 +1,35 @@
+scalar Time
+
+type User {
+    id: ID!
+    username: String!
+    email: String!
+    password: String!
+    createdAt: Time!
+}
+
+type AuthResponse {
+    accessToken: String!
+    user: User!
+}
+
+input RegisterInput {
+    email: String!
+    username: String!
+    password: String!
+    confirmPassword: String!
+}
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+type Query {
+    me: User
+}
+
+type Mutation {
+    register(registerInput: RegisterInput!): AuthResponse!
+    login(loginInput: LoginInput!): AuthResponse!
+}
