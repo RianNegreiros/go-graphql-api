@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	internal "github.com/RianNegreiros/go-graphql-api/internal"
+	models "github.com/RianNegreiros/go-graphql-api/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -15,21 +15,21 @@ type UserRepo struct {
 }
 
 // Create provides a mock function with given fields: ctx, user
-func (_m *UserRepo) Create(ctx context.Context, user internal.User) (internal.User, error) {
+func (_m *UserRepo) Create(ctx context.Context, user models.User) (models.User, error) {
 	ret := _m.Called(ctx, user)
 
-	var r0 internal.User
+	var r0 models.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, internal.User) (internal.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, models.User) (models.User, error)); ok {
 		return rf(ctx, user)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, internal.User) internal.User); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, models.User) models.User); ok {
 		r0 = rf(ctx, user)
 	} else {
-		r0 = ret.Get(0).(internal.User)
+		r0 = ret.Get(0).(models.User)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, internal.User) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, models.User) error); ok {
 		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)
@@ -39,18 +39,18 @@ func (_m *UserRepo) Create(ctx context.Context, user internal.User) (internal.Us
 }
 
 // GetByEmail provides a mock function with given fields: ctx, email
-func (_m *UserRepo) GetByEmail(ctx context.Context, email string) (internal.User, error) {
+func (_m *UserRepo) GetByEmail(ctx context.Context, email string) (models.User, error) {
 	ret := _m.Called(ctx, email)
 
-	var r0 internal.User
+	var r0 models.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (internal.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) (models.User, error)); ok {
 		return rf(ctx, email)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) internal.User); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) models.User); ok {
 		r0 = rf(ctx, email)
 	} else {
-		r0 = ret.Get(0).(internal.User)
+		r0 = ret.Get(0).(models.User)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -63,18 +63,18 @@ func (_m *UserRepo) GetByEmail(ctx context.Context, email string) (internal.User
 }
 
 // GetByUsername provides a mock function with given fields: ctx, username
-func (_m *UserRepo) GetByUsername(ctx context.Context, username string) (internal.User, error) {
+func (_m *UserRepo) GetByUsername(ctx context.Context, username string) (models.User, error) {
 	ret := _m.Called(ctx, username)
 
-	var r0 internal.User
+	var r0 models.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (internal.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) (models.User, error)); ok {
 		return rf(ctx, username)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) internal.User); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) models.User); ok {
 		r0 = rf(ctx, username)
 	} else {
-		r0 = ret.Get(0).(internal.User)
+		r0 = ret.Get(0).(models.User)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {

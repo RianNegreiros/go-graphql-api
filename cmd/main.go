@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/RianNegreiros/go-graphql-api/config"
-	"github.com/RianNegreiros/go-graphql-api/internal/postgres"
 	"log"
+
+	"github.com/RianNegreiros/go-graphql-api/config"
+	"github.com/RianNegreiros/go-graphql-api/postgres"
 )
 
 func main() {
