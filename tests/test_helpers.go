@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
-	"github.com/RianNegreiros/go-graphql-api/internal/postgres"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/RianNegreiros/go-graphql-api/postgres"
+	"github.com/stretchr/testify/require"
 )
 
 func TeardownDB(ctx context.Context, t *testing.T, db *postgres.DB) {

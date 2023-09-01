@@ -3,17 +3,18 @@ package domain
 import (
 	"context"
 	"errors"
-	"github.com/RianNegreiros/go-graphql-api/internal"
-	"github.com/RianNegreiros/go-graphql-api/internal/domain"
-	mocks "github.com/RianNegreiros/go-graphql-api/mocks/internal_"
+	"testing"
+
+	"github.com/RianNegreiros/go-graphql-api/domain"
+	mocks "github.com/RianNegreiros/go-graphql-api/mocks/models"
+	"github.com/RianNegreiros/go-graphql-api/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
-	"testing"
 )
 
 func TestAuthService_Register(t *testing.T) {
-	validInput := internal.RegisterInput{
+	validInput := models.RegisterInput{
 		Username:        "john",
 		Email:           "johndoe@mail.com",
 		Password:        "123456",
@@ -26,13 +27,13 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo := &mocks.UserRepo{}
 
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).
-			Return(internal.User{}, internal.ErrNotFound)
+			Return(models.User{}, models.ErrNotFound)
 
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
-			Return(internal.User{}, internal.ErrNotFound)
+			Return(models.User{}, models.ErrNotFound)
 
 		userRepo.On("Create", mock.Anything, mock.Anything).
-			Return(internal.User{
+			Return(models.User{
 				ID:       "user_id",
 				Username: validInput.Username,
 				Email:    validInput.Email,
@@ -59,12 +60,12 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo := &mocks.UserRepo{}
 
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).
-			Return(internal.User{}, nil)
+			Return(models.User{}, nil)
 
 		service := domain.NewAuthService(userRepo)
 
 		_, err := service.Register(ctx, validInput)
-		require.ErrorIs(t, err, internal.ErrUsernameTaken)
+		require.ErrorIs(t, err, models.ErrUsernameTaken)
 
 		userRepo.AssertNotCalled(t, "Create")
 		userRepo.AssertExpectations(t)
@@ -76,15 +77,15 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo := &mocks.UserRepo{}
 
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).
-			Return(internal.User{}, internal.ErrNotFound)
+			Return(models.User{}, models.ErrNotFound)
 
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
-			Return(internal.User{}, nil)
+			Return(models.User{}, nil)
 
 		service := domain.NewAuthService(userRepo)
 
 		_, err := service.Register(ctx, validInput)
-		require.ErrorIs(t, err, internal.ErrEmailTaken)
+		require.ErrorIs(t, err, models.ErrEmailTaken)
 
 		userRepo.AssertNotCalled(t, "Create")
 		userRepo.AssertExpectations(t)
@@ -96,13 +97,13 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo := &mocks.UserRepo{}
 
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).
-			Return(internal.User{}, internal.ErrNotFound)
+			Return(models.User{}, models.ErrNotFound)
 
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
-			Return(internal.User{}, internal.ErrNotFound)
+			Return(models.User{}, models.ErrNotFound)
 
 		userRepo.On("Create", mock.Anything, mock.Anything).
-			Return(internal.User{}, errors.New("some error"))
+			Return(models.User{}, errors.New("some error"))
 
 		service := domain.NewAuthService(userRepo)
 
@@ -119,7 +120,7 @@ func TestAuthService_Register(t *testing.T) {
 
 		service := domain.NewAuthService(userRepo)
 
-		_, err := service.Register(ctx, internal.RegisterInput{})
+		_, err := service.Register(ctx, models.RegisterInput{})
 		require.Error(t, err)
 
 		userRepo.AssertNotCalled(t, "GetByUsername")
@@ -130,7 +131,7 @@ func TestAuthService_Register(t *testing.T) {
 }
 
 func TestAuthService_Login(t *testing.T) {
-	validInput := internal.LoginInput{
+	validInput := models.LoginInput{
 		Email:    "johndoe@mail.com",
 		Password: "hashed_password",
 	}
@@ -144,7 +145,7 @@ func TestAuthService_Login(t *testing.T) {
 		userRepo := &mocks.UserRepo{}
 
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
-			Return(internal.User{
+			Return(models.User{
 				ID:       "user_id",
 				Username: "john",
 				Email:    validInput.Email,
@@ -170,12 +171,12 @@ func TestAuthService_Login(t *testing.T) {
 		userRepo := &mocks.UserRepo{}
 
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
-			Return(internal.User{}, internal.ErrNotFound)
+			Return(models.User{}, models.ErrNotFound)
 
 		service := domain.NewAuthService(userRepo)
 
 		_, err := service.Login(ctx, validInput)
-		require.ErrorIs(t, err, internal.ErrInvalidCredentials)
+		require.ErrorIs(t, err, models.ErrInvalidCredentials)
 
 		userRepo.AssertExpectations(t)
 	})
@@ -186,7 +187,7 @@ func TestAuthService_Login(t *testing.T) {
 		userRepo := &mocks.UserRepo{}
 
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
-			Return(internal.User{}, errors.New("some error"))
+			Return(models.User{}, errors.New("some error"))
 
 		service := domain.NewAuthService(userRepo)
 
@@ -203,8 +204,8 @@ func TestAuthService_Login(t *testing.T) {
 
 		service := domain.NewAuthService(userRepo)
 
-		_, err := service.Login(ctx, internal.LoginInput{})
-		require.ErrorIs(t, err, internal.ErrValidation)
+		_, err := service.Login(ctx, models.LoginInput{})
+		require.ErrorIs(t, err, models.ErrValidation)
 
 		userRepo.AssertNotCalled(t, "GetByEmail")
 	})

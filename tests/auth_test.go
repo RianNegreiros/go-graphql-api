@@ -1,20 +1,21 @@
 package tests
 
 import (
-	"github.com/RianNegreiros/go-graphql-api/internal"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/RianNegreiros/go-graphql-api/models"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRegisterInput_Validate(t *testing.T) {
 	testCases := []struct {
 		name  string
-		input internal.RegisterInput
+		input models.RegisterInput
 		err   error
 	}{
 		{
 			name: "valid input",
-			input: internal.RegisterInput{
+			input: models.RegisterInput{
 				Username:        "john",
 				Email:           "johndoe@mail.com",
 				Password:        "123456",
@@ -24,40 +25,40 @@ func TestRegisterInput_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid email",
-			input: internal.RegisterInput{
+			input: models.RegisterInput{
 				Username:        "john",
 				Email:           "john",
 				Password:        "123456",
 				ConfirmPassword: "123456",
 			},
-			err: internal.ErrValidation,
+			err: models.ErrValidation,
 		}, {
 			name: "invalid username",
-			input: internal.RegisterInput{
+			input: models.RegisterInput{
 				Username:        "j",
 				Email:           "johndoe@mail.com",
 				Password:        "123456",
 				ConfirmPassword: "123456",
 			},
-			err: internal.ErrValidation,
+			err: models.ErrValidation,
 		}, {
 			name: "invalid password",
-			input: internal.RegisterInput{
+			input: models.RegisterInput{
 				Username:        "john",
 				Email:           "johndoe@mail.com",
 				Password:        "12345",
 				ConfirmPassword: "12345",
 			},
-			err: internal.ErrValidation,
+			err: models.ErrValidation,
 		}, {
 			name: "password and confirm password don't match",
-			input: internal.RegisterInput{
+			input: models.RegisterInput{
 				Username:        "john",
 				Email:           "johndoe@mail.com",
 				Password:        "123456",
 				ConfirmPassword: "1234567",
 			},
-			err: internal.ErrValidation,
+			err: models.ErrValidation,
 		},
 	}
 
@@ -74,14 +75,14 @@ func TestRegisterInput_Validate(t *testing.T) {
 }
 
 func TestRegisterInput_Sanitize(t *testing.T) {
-	input := internal.RegisterInput{
+	input := models.RegisterInput{
 		Username:        "  john  ",
 		Email:           "  JOHNDOE@mail.com ",
 		Password:        " 123456 ",
 		ConfirmPassword: " 123456 ",
 	}
 
-	want := internal.RegisterInput{
+	want := models.RegisterInput{
 		Username:        "john",
 		Email:           "johndoe@mail.com",
 		Password:        "123456",
@@ -96,12 +97,12 @@ func TestRegisterInput_Sanitize(t *testing.T) {
 func TestLoginInput_Validate(t *testing.T) {
 	testCases := []struct {
 		name  string
-		input internal.LoginInput
+		input models.LoginInput
 		err   error
 	}{
 		{
 			name: "valid input",
-			input: internal.LoginInput{
+			input: models.LoginInput{
 				Email:    "johndoe@mail.com",
 				Password: "123456",
 			},
@@ -109,19 +110,19 @@ func TestLoginInput_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid email",
-			input: internal.LoginInput{
+			input: models.LoginInput{
 				Email:    "invalid_email",
 				Password: "123456",
 			},
-			err: internal.ErrValidation,
+			err: models.ErrValidation,
 		},
 		{
 			name: "password required",
-			input: internal.LoginInput{
+			input: models.LoginInput{
 				Email:    "johndoe@mail.com",
 				Password: "",
 			},
-			err: internal.ErrValidation,
+			err: models.ErrValidation,
 		},
 	}
 
@@ -139,12 +140,12 @@ func TestLoginInput_Validate(t *testing.T) {
 }
 
 func TestLoginInput_Sanitize(t *testing.T) {
-	input := internal.LoginInput{
+	input := models.LoginInput{
 		Email:    "   JOHNDOE@mail.com   ",
 		Password: " 123456 ",
 	}
 
-	want := internal.LoginInput{
+	want := models.LoginInput{
 		Email:    "johndoe@mail.com",
 		Password: "123456",
 	}
