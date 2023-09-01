@@ -19,17 +19,12 @@ func NewUserRepo(db *DB) *UserRepo {
 	}
 }
 
-func (r *UserRepo) Create(ctx context.Context, user models.User) (models.User, error) {
-	tx, err := r.DB.Pool.Begin(ctx)
+func (ur *UserRepo) Create(ctx context.Context, user models.User) (models.User, error) {
+	tx, err := ur.DB.Pool.Begin(ctx)
 	if err != nil {
-		return models.User{}, fmt.Errorf("error starting transaction: %w", err)
+		return models.User{}, fmt.Errorf("error starting transaction: %v", err)
 	}
-	defer func(tx pgx.Tx, ctx context.Context) {
-		err := tx.Rollback(ctx)
-		if err != nil {
-			fmt.Printf("error rolling back transaction: %v", err)
-		}
-	}(tx, ctx)
+	defer tx.Rollback(ctx)
 
 	user, err = createUser(ctx, tx, user)
 	if err != nil {
@@ -37,52 +32,84 @@ func (r *UserRepo) Create(ctx context.Context, user models.User) (models.User, e
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return models.User{}, fmt.Errorf("error committing transaction: %w", err)
+		return models.User{}, fmt.Errorf("error commiting: %v", err)
 	}
 
 	return user, nil
 }
 
 func createUser(ctx context.Context, tx pgx.Tx, user models.User) (models.User, error) {
-	query := `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *;;`
+	query := `INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING *;`
 
 	u := models.User{}
 
-	if err := pgxscan.Get(ctx, tx, &u, query, user.Username, user.Email, user.Password); err != nil {
-		return models.User{}, fmt.Errorf("error creating user: %w", err)
+	if err := pgxscan.Get(ctx, tx, &u, query, user.Email, user.Username, user.Password); err != nil {
+		return models.User{}, fmt.Errorf("error insert: %v", err)
 	}
 
 	return u, nil
 }
 
-func (r *UserRepo) GetByUsername(ctx context.Context, username string) (models.User, error) {
+func (ur *UserRepo) GetByUsername(ctx context.Context, username string) (models.User, error) {
 	query := `SELECT * FROM users WHERE username = $1 LIMIT 1;`
 
 	u := models.User{}
 
-	if err := pgxscan.Get(ctx, r.DB.Pool, &u, query, username); err != nil {
+	if err := pgxscan.Get(ctx, ur.DB.Pool, &u, query, username); err != nil {
 		if pgxscan.NotFound(err) {
 			return models.User{}, models.ErrNotFound
 		}
 
-		return models.User{}, fmt.Errorf("error getting user by username: %w", err)
+		return models.User{}, fmt.Errorf("error select: %v", err)
 	}
 
 	return u, nil
 }
 
-func (r *UserRepo) GetByEmail(ctx context.Context, email string) (models.User, error) {
+func (ur *UserRepo) GetByEmail(ctx context.Context, email string) (models.User, error) {
 	query := `SELECT * FROM users WHERE email = $1 LIMIT 1;`
 
 	u := models.User{}
 
-	if err := pgxscan.Get(ctx, r.DB.Pool, &u, query, email); err != nil {
+	if err := pgxscan.Get(ctx, ur.DB.Pool, &u, query, email); err != nil {
 		if pgxscan.NotFound(err) {
 			return models.User{}, models.ErrNotFound
 		}
 
-		return models.User{}, fmt.Errorf("error getting user by username: %w", err)
+		return models.User{}, fmt.Errorf("error select: %v", err)
 	}
 
 	return u, nil
+}
+
+func (ur *UserRepo) GetByID(ctx context.Context, id string) (models.User, error) {
+	query := `SELECT * FROM users WHERE id = $1 LIMIT 1;`
+
+	u := models.User{}
+
+	if err := pgxscan.Get(ctx, ur.DB.Pool, &u, query, id); err != nil {
+		if pgxscan.NotFound(err) {
+			return models.User{}, models.ErrNotFound
+		}
+
+		return models.User{}, fmt.Errorf("error select: %v", err)
+	}
+
+	return u, nil
+}
+
+func (ur *UserRepo) GetByIds(ctx context.Context, ids []string) ([]models.User, error) {
+	return getUsersByIds(ctx, ur.DB.Pool, ids)
+}
+
+func getUsersByIds(ctx context.Context, q pgxscan.Querier, ids []string) ([]models.User, error) {
+	query := `SELECT * FROM users WHERE id = ANY($1);`
+
+	var uu []models.User
+
+	if err := pgxscan.Select(ctx, q, &uu, query, ids); err != nil {
+		return nil, fmt.Errorf("error get users by ids: %+v", err)
+	}
+
+	return uu, nil
 }

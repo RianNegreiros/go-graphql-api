@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/RianNegreiros/go-graphql-api/domain"
 	"log"
 	"net/http"
 	"time"
@@ -20,9 +21,9 @@ func main() {
 
 	config.LoadEnv(".env")
 
-	config := config.New()
+	conf := config.New()
 
-	db := postgres.New(ctx, config)
+	db := postgres.New(ctx, conf)
 
 	if err := db.Migrate(); err != nil {
 		log.Fatalf("error migrating postgres: %v", err)
@@ -36,14 +37,23 @@ func main() {
 	router.Use(middleware.RedirectSlashes)
 	router.Use(middleware.Timeout(time.Second * 60))
 
+	userRepo := postgres.NewUserRepo(db)
+
+	authService := domain.NewAuthService(userRepo)
+
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", handler.NewDefaultServer(
 		graph.NewExecutableSchema(
 			graph.Config{
-				Resolvers: &graph.Resolver{},
+				Resolvers: &graph.Resolver{
+					AuthService: authService,
+				},
 			},
 		),
 	))
 
-	http.ListenAndServe(":8080", router)
+	err := http.ListenAndServe(":8080", router)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

@@ -29,10 +29,9 @@ type LoginInput struct {
 	Password string
 }
 
-func (i *LoginInput) Sanitize() {
-	i.Email = strings.TrimSpace(i.Email)
-	i.Email = strings.ToLower(i.Email)
-	i.Password = strings.TrimSpace(i.Password)
+func (in *LoginInput) Sanitize() {
+	in.Email = strings.TrimSpace(in.Email)
+	in.Email = strings.ToLower(in.Email)
 }
 
 func (i LoginInput) Validate() error {
@@ -40,7 +39,7 @@ func (i LoginInput) Validate() error {
 		return fmt.Errorf("%w: invalid email address", ErrValidation)
 	}
 
-	if len(i.Password) < PasswordMinLength {
+	if len(i.Password) < 1 {
 		return fmt.Errorf("%w: password required", ErrValidation)
 	}
 
@@ -79,10 +78,9 @@ func (r RegisterInput) Validate() error {
 	return nil
 }
 
-func (r *RegisterInput) Sanitize() {
-	r.Username = strings.TrimSpace(r.Username)
-	r.Email = strings.TrimSpace(r.Email)
-	r.Email = strings.ToLower(r.Email)
-	r.Password = strings.TrimSpace(r.Password)
-	r.ConfirmPassword = strings.TrimSpace(r.ConfirmPassword)
+func (in *RegisterInput) Sanitize() {
+	in.Email = strings.TrimSpace(in.Email)
+	in.Email = strings.ToLower(in.Email)
+
+	in.Username = strings.TrimSpace(in.Username)
 }

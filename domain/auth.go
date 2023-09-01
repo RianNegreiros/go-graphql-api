@@ -9,45 +9,48 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var passwordCost = bcrypt.DefaultCost
+
 type AuthService struct {
 	UserRepo models.UserRepo
 }
 
-func NewAuthService(userRepo models.UserRepo) *AuthService {
-	return &AuthService{UserRepo: userRepo}
+func NewAuthService(ur models.UserRepo) *AuthService {
+	return &AuthService{
+		UserRepo: ur,
+	}
 }
 
-func (s *AuthService) Register(ctx context.Context, input models.RegisterInput) (models.AuthResponse, error) {
+func (as *AuthService) Register(ctx context.Context, input models.RegisterInput) (models.AuthResponse, error) {
 	input.Sanitize()
 
 	if err := input.Validate(); err != nil {
 		return models.AuthResponse{}, err
 	}
 
-	if _, err := s.UserRepo.GetByUsername(ctx, input.Username); !errors.Is(err, models.ErrNotFound) {
+	if _, err := as.UserRepo.GetByUsername(ctx, input.Username); !errors.Is(err, models.ErrNotFound) {
 		return models.AuthResponse{}, models.ErrUsernameTaken
 	}
 
-	if _, err := s.UserRepo.GetByEmail(ctx, input.Email); !errors.Is(err, models.ErrNotFound) {
+	if _, err := as.UserRepo.GetByEmail(ctx, input.Email); !errors.Is(err, models.ErrNotFound) {
 		return models.AuthResponse{}, models.ErrEmailTaken
 	}
 
 	user := models.User{
-		Username: input.Username,
 		Email:    input.Email,
+		Username: input.Username,
 	}
 
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), passwordCost)
 	if err != nil {
-		return models.AuthResponse{}, fmt.Errorf("%w: error generating password hash", err)
+		return models.AuthResponse{}, fmt.Errorf("error hashing password: %v", err)
 	}
 
 	user.Password = string(hashPassword)
 
-	user, err = s.UserRepo.Create(ctx, user)
+	user, err = as.UserRepo.Create(ctx, user)
 	if err != nil {
-		return models.AuthResponse{}, fmt.Errorf("%w: error creating user", err)
+		return models.AuthResponse{}, fmt.Errorf("error creating user: %v", err)
 	}
 
 	return models.AuthResponse{
@@ -56,14 +59,14 @@ func (s *AuthService) Register(ctx context.Context, input models.RegisterInput) 
 	}, nil
 }
 
-func (s *AuthService) Login(ctx context.Context, input models.LoginInput) (models.AuthResponse, error) {
+func (as *AuthService) Login(ctx context.Context, input models.LoginInput) (models.AuthResponse, error) {
 	input.Sanitize()
 
 	if err := input.Validate(); err != nil {
 		return models.AuthResponse{}, err
 	}
 
-	user, err := s.UserRepo.GetByEmail(ctx, input.Email)
+	user, err := as.UserRepo.GetByEmail(ctx, input.Email)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrNotFound):
