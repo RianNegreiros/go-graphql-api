@@ -44,6 +44,7 @@ func main() {
 	authTokenService := jwt.NewTokenService(conf)
 	authService := domain.NewAuthService(userRepo, authTokenService)
 	postService := domain.NewPostService(postRepo)
+	userService := domain.NewUserService(userRepo)
 
 	router.Use(authMiddleware(authTokenService))
 	router.Handle("/", playground.Handler("Graphql playground", "/query"))
@@ -53,6 +54,7 @@ func main() {
 				Resolvers: &graph.Resolver{
 					AuthService: authService,
 					PostService: postService,
+					UserService: userService,
 				},
 			},
 		),

@@ -54,7 +54,12 @@ func (m *mutationResolver) DeletePost(ctx context.Context, id string) (bool, err
 }
 
 func (t *postResolver) User(ctx context.Context, obj *Post) (*User, error) {
-	panic("not implemented")
+	user, err := t.UserService.GetByID(ctx, obj.UserID)
+	if err != nil {
+		return nil, buildError(ctx, err)
+	}
+
+	return mapUser(user), nil
 }
 
 func (m *mutationResolver) CreateReply(ctx context.Context, parentID string, input CreatePostInput) (*Post, error) {

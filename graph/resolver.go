@@ -16,6 +16,7 @@ import (
 type Resolver struct {
 	AuthService user.AuthService
 	PostService post.PostService
+	UserService user.UserService
 }
 
 type queryResolver struct {

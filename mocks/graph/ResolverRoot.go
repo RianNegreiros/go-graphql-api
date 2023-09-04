@@ -28,6 +28,22 @@ func (_m *ResolverRoot) Mutation() graph.MutationResolver {
 	return r0
 }
 
+// Post provides a mock function with given fields:
+func (_m *ResolverRoot) Post() graph.PostResolver {
+	ret := _m.Called()
+
+	var r0 graph.PostResolver
+	if rf, ok := ret.Get(0).(func() graph.PostResolver); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(graph.PostResolver)
+		}
+	}
+
+	return r0
+}
+
 // Query provides a mock function with given fields:
 func (_m *ResolverRoot) Query() graph.QueryResolver {
 	ret := _m.Called()
