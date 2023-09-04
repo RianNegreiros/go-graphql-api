@@ -4,6 +4,9 @@ mock:
 test:
 	go test -v ./...
 
+test-integration:
+	go test ./... -tags="integration" -count=1
+
 migrate:
 	migrate -source file://internal/postgres/migrations \
 			-database postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable \
@@ -24,4 +27,7 @@ migration:
 		migrate create -ext sql -dir internal/postgres/migrations -seq $$name
 		
 run:
-	go run cmd/main.go
+	go run cmd/*.go
+
+generate:
+	go generate ./...

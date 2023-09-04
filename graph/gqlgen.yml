@@ -1,0 +1,7 @@
+skip_validation: true
+
+models:
+  Post:
+    fields:
+      user:
+        resolver: true

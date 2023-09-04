@@ -1,0 +1,52 @@
+scalar Time
+
+type User {
+    id: ID!
+    username: String!
+    email: String!
+    password: String!
+    createdAt: Time!
+}
+
+type Post {
+    id: ID!
+    body: String!
+    username: String!
+    user: User!
+    userID: ID!
+    createdAt: Time!
+}
+
+type AuthResponse {
+    accessToken: String!
+    user: User!
+}
+
+input RegisterInput {
+    email: String!
+    username: String!
+    password: String!
+    confirmPassword: String!
+}
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input CreatePostInput {
+    body: String!
+}
+
+type Query {
+    me: User
+    posts: [Post!]
+}
+
+type Mutation {
+    register(input: RegisterInput!): AuthResponse!
+    login(input: LoginInput!): AuthResponse!
+    createPost(input: CreatePostInput!): Post!
+    createReply(parentId: ID!, input: CreatePostInput): Post!
+    deletePost(id: ID!): Boolean!
+}

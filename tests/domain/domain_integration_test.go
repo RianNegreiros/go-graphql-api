@@ -8,16 +8,21 @@ import (
 	"os"
 	"testing"
 
+	"github.com/RianNegreiros/go-graphql-api/internal/jwt"
+
 	"github.com/RianNegreiros/go-graphql-api/config"
-	"github.com/RianNegreiros/go-graphql-api/domain"
-	"github.com/RianNegreiros/go-graphql-api/postgres"
+	"github.com/RianNegreiros/go-graphql-api/internal/domain"
+	"github.com/RianNegreiros/go-graphql-api/internal/postgres"
 )
 
 var (
-	conf        *config.Config
-	db          *postgres.DB
-	authService *domain.AuthService
-	userRepo    *postgres.UserRepo
+	conf             *config.Config
+	db               *postgres.DB
+	authService      *domain.AuthService
+	userRepo         *postgres.UserRepo
+	postRepo         *postgres.PostRepo
+	authTokenService *jwt.TokenService
+	postService      *domain.PostService
 )
 
 func TestMain(m *testing.M) {
@@ -39,8 +44,12 @@ func TestMain(m *testing.M) {
 	}
 
 	userRepo = postgres.NewUserRepo(db)
+	postRepo = postgres.NewPostRepo(db)
 
-	authService = domain.NewAuthService(userRepo)
+	authTokenService = jwt.NewTokenService(conf)
+
+	authService = domain.NewAuthService(userRepo, authTokenService)
+	postService = domain.NewPostService(postRepo)
 
 	os.Exit(m.Run())
 }

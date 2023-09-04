@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	models "github.com/RianNegreiros/go-graphql-api/models"
+	user "github.com/RianNegreiros/go-graphql-api/internal/user"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -15,21 +15,21 @@ type AuthService struct {
 }
 
 // Login provides a mock function with given fields: ctx, input
-func (_m *AuthService) Login(ctx context.Context, input models.LoginInput) (models.AuthResponse, error) {
+func (_m *AuthService) Login(ctx context.Context, input user.LoginInput) (user.AuthResponse, error) {
 	ret := _m.Called(ctx, input)
 
-	var r0 models.AuthResponse
+	var r0 user.AuthResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.LoginInput) (models.AuthResponse, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, user.LoginInput) (user.AuthResponse, error)); ok {
 		return rf(ctx, input)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, models.LoginInput) models.AuthResponse); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, user.LoginInput) user.AuthResponse); ok {
 		r0 = rf(ctx, input)
 	} else {
-		r0 = ret.Get(0).(models.AuthResponse)
+		r0 = ret.Get(0).(user.AuthResponse)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, models.LoginInput) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, user.LoginInput) error); ok {
 		r1 = rf(ctx, input)
 	} else {
 		r1 = ret.Error(1)
@@ -39,21 +39,21 @@ func (_m *AuthService) Login(ctx context.Context, input models.LoginInput) (mode
 }
 
 // Register provides a mock function with given fields: ctx, input
-func (_m *AuthService) Register(ctx context.Context, input models.RegisterInput) (models.AuthResponse, error) {
+func (_m *AuthService) Register(ctx context.Context, input user.RegisterInput) (user.AuthResponse, error) {
 	ret := _m.Called(ctx, input)
 
-	var r0 models.AuthResponse
+	var r0 user.AuthResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.RegisterInput) (models.AuthResponse, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, user.RegisterInput) (user.AuthResponse, error)); ok {
 		return rf(ctx, input)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, models.RegisterInput) models.AuthResponse); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, user.RegisterInput) user.AuthResponse); ok {
 		r0 = rf(ctx, input)
 	} else {
-		r0 = ret.Get(0).(models.AuthResponse)
+		r0 = ret.Get(0).(user.AuthResponse)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, models.RegisterInput) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, user.RegisterInput) error); ok {
 		r1 = rf(ctx, input)
 	} else {
 		r1 = ret.Error(1)
