@@ -3,14 +3,15 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/RianNegreiros/go-graphql-api/internal/user"
 )
 
-func mapAuthResponse(authResponse user.AuthResponse) *AuthResponse {
+func mapAuthResponse(a user.AuthResponse) *AuthResponse {
 	return &AuthResponse{
-		AccessToken: authResponse.AccessToken,
-		User:        mapUser(authResponse.User),
+		AccessToken: a.AccessToken,
+		User:        mapUser(a.User),
 	}
 }
 
@@ -21,6 +22,10 @@ func (m *mutationResolver) Register(ctx context.Context, input RegisterInput) (*
 		Password:        input.Password,
 		ConfirmPassword: input.ConfirmPassword,
 	})
+
+	fmt.Println(res)
+	fmt.Println(input)
+
 	if err != nil {
 		switch {
 		case errors.Is(err, user.ErrValidation) ||
@@ -40,6 +45,7 @@ func (m *mutationResolver) Login(ctx context.Context, input LoginInput) (*AuthRe
 		Email:    input.Email,
 		Password: input.Password,
 	})
+
 	if err != nil {
 		switch {
 		case errors.Is(err, user.ErrValidation) ||

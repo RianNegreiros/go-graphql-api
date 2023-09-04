@@ -1,25 +1,25 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/RianNegreiros/go-graphql-api/internal/transport"
 	"github.com/RianNegreiros/go-graphql-api/internal/user"
+	"net/http"
 )
 
-func authMiddleware(service user.AuthTokenService) func(handler http.Handler) http.Handler {
-	return func(handler http.Handler) http.Handler {
+func authMiddleware(authTokenService user.AuthTokenService) func(handler http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
-			token, err := service.ParseTokenFromRequest(ctx, r)
+			token, err := authTokenService.ParseTokenFromRequest(ctx, r)
 			if err != nil {
-				w.WriteHeader(http.StatusUnauthorized)
+				next.ServeHTTP(w, r)
 				return
 			}
+
 			ctx = transport.PutUserIDIntoContext(ctx, token.Sub)
 
-			handler.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }

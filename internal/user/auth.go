@@ -15,10 +15,13 @@ var (
 	ErrNotFound           = errors.New("not found")
 	ErrInvalidToken       = errors.New("invalid token")
 	ErrNoUserIDInContext  = errors.New("no user id in context")
+	ErrGenerateToken      = errors.New("error generating token")
+	ErrUnauthenticated    = errors.New("unauthenticated")
+	ErrForbidden          = errors.New("forbidden")
 )
 
 var (
-	UsernameMinLength = 3
+	UsernameMinLength = 2
 	PasswordMinLength = 6
 )
 
@@ -34,16 +37,50 @@ type AuthTokenService interface {
 	ParseTokenFromRequest(ctx context.Context, r *http.Request) (AuthToken, error)
 }
 
+type AuthToken struct {
+	ID  string
+	Sub string
+}
+
 type AuthResponse struct {
 	AccessToken string
 	User        UserModel
 }
 
 type RegisterInput struct {
-	Username        string
 	Email           string
+	Username        string
 	Password        string
 	ConfirmPassword string
+}
+
+func (in *RegisterInput) Sanitize() {
+	in.Email = strings.TrimSpace(in.Email)
+	in.Email = strings.ToLower(in.Email)
+
+	in.Username = strings.TrimSpace(in.Username)
+	in.Password = strings.TrimSpace(in.Password)
+	in.ConfirmPassword = strings.TrimSpace(in.ConfirmPassword)
+}
+
+func (in RegisterInput) Validate() error {
+	if len(in.Username) < UsernameMinLength {
+		return fmt.Errorf("%w: username not long enough, (%d) characters at least", ErrValidation, UsernameMinLength)
+	}
+
+	if _, err := mail.ParseAddress(in.Email); err != nil {
+		return fmt.Errorf("%w: email not valid", ErrValidation)
+	}
+
+	if len(in.Password) < PasswordMinLength {
+		return fmt.Errorf("%w: password not long enough, (%d) characters at least", ErrValidation, PasswordMinLength)
+	}
+
+	if in.Password != in.ConfirmPassword {
+		return fmt.Errorf("%w: confirm password must match the password", ErrValidation)
+	}
+
+	return nil
 }
 
 type LoginInput struct {
@@ -51,59 +88,21 @@ type LoginInput struct {
 	Password string
 }
 
-type AuthToken struct {
-	ID  string
-	Sub string
+func (in *LoginInput) Sanitize() {
+	in.Email = strings.TrimSpace(in.Email)
+	in.Email = strings.ToLower(in.Email)
+
+	in.Password = strings.TrimSpace(in.Password)
 }
 
-func (i LoginInput) Sanitize() LoginInput {
-	i.Email = strings.TrimSpace(i.Email)
-	i.Email = strings.ToLower(i.Email)
-
-	i.Password = strings.TrimSpace(i.Password)
-
-	return i
-}
-
-func (i LoginInput) Validate() error {
-	if _, err := mail.ParseAddress(i.Email); err != nil {
-		return fmt.Errorf("%w: invalid email address", ErrValidation)
+func (in LoginInput) Validate() error {
+	if _, err := mail.ParseAddress(in.Email); err != nil {
+		return fmt.Errorf("%w: email not valid", ErrValidation)
 	}
 
-	if len(i.Password) < 1 {
+	if len(in.Password) < 1 {
 		return fmt.Errorf("%w: password required", ErrValidation)
 	}
 
 	return nil
-}
-
-func (i RegisterInput) Validate() error {
-	if len(i.Username) < UsernameMinLength {
-		return fmt.Errorf("%w: username must be at least %d characters long", ErrValidation, UsernameMinLength)
-	}
-
-	if _, err := mail.ParseAddress(i.Email); err != nil {
-		return fmt.Errorf("%w: invalid email address", ErrValidation)
-	}
-
-	if len(i.Password) < PasswordMinLength {
-		return fmt.Errorf("%w: password must be at least %d characters long", ErrValidation, PasswordMinLength)
-	}
-
-	if i.Password != i.ConfirmPassword {
-		return fmt.Errorf("%w: password and confirm password must match", ErrValidation)
-	}
-
-	return nil
-}
-
-func (i RegisterInput) Sanitize() RegisterInput {
-	i.Email = strings.TrimSpace(i.Email)
-	i.Email = strings.ToLower(i.Email)
-
-	i.Username = strings.TrimSpace(i.Username)
-	i.Password = strings.TrimSpace(i.Password)
-	i.ConfirmPassword = strings.TrimSpace(i.ConfirmPassword)
-
-	return i
 }

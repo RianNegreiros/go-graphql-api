@@ -12,17 +12,19 @@ import (
 var passwordCost = bcrypt.DefaultCost
 
 type AuthService struct {
-	UserRepo user.UserRepo
+	AuthTokenService user.AuthTokenService
+	UserRepo         user.UserRepo
 }
 
-func NewAuthService(ur user.UserRepo) *AuthService {
+func NewAuthService(ur user.UserRepo, service user.AuthTokenService) *AuthService {
 	return &AuthService{
-		UserRepo: ur,
+		UserRepo:         ur,
+		AuthTokenService: service,
 	}
 }
 
 func (as *AuthService) Register(ctx context.Context, input user.RegisterInput) (user.AuthResponse, error) {
-	input = input.Sanitize()
+	input.Sanitize()
 
 	if err := input.Validate(); err != nil {
 		return user.AuthResponse{}, err
@@ -53,14 +55,19 @@ func (as *AuthService) Register(ctx context.Context, input user.RegisterInput) (
 		return user.AuthResponse{}, fmt.Errorf("error creating user: %v", err)
 	}
 
+	accessToken, err := as.AuthTokenService.CreateAccessToken(ctx, u)
+	if err != nil {
+		return user.AuthResponse{}, user.ErrGenerateToken
+	}
+
 	return user.AuthResponse{
-		AccessToken: "access_token",
+		AccessToken: accessToken,
 		User:        u,
 	}, nil
 }
 
 func (as *AuthService) Login(ctx context.Context, input user.LoginInput) (user.AuthResponse, error) {
-	input = input.Sanitize()
+	input.Sanitize()
 
 	if err := input.Validate(); err != nil {
 		return user.AuthResponse{}, err
@@ -80,8 +87,13 @@ func (as *AuthService) Login(ctx context.Context, input user.LoginInput) (user.A
 		return user.AuthResponse{}, user.ErrInvalidCredentials
 	}
 
+	accessToken, err := as.AuthTokenService.CreateAccessToken(ctx, u)
+	if err != nil {
+		return user.AuthResponse{}, user.ErrGenerateToken
+	}
+
 	return user.AuthResponse{
-		AccessToken: "access_token",
+		AccessToken: accessToken,
 		User:        u,
 	}, nil
 }

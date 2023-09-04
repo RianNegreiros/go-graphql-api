@@ -2,8 +2,7 @@ package graph
 
 import (
 	"context"
-	"fmt"
-
+	"github.com/RianNegreiros/go-graphql-api/internal/transport"
 	"github.com/RianNegreiros/go-graphql-api/internal/user"
 )
 
@@ -17,5 +16,12 @@ func mapUser(user user.UserModel) *User {
 }
 
 func (r *queryResolver) Me(ctx context.Context) (*User, error) {
-	panic(fmt.Errorf("not implemented"))
+	userID, err := transport.GetUserIDFromContext(ctx)
+	if err != nil {
+		return nil, user.ErrUnauthenticated
+	}
+
+	return mapUser(user.UserModel{
+		ID: userID,
+	}), nil
 }

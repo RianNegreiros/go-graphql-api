@@ -13,8 +13,8 @@ import (
 	"github.com/RianNegreiros/go-graphql-api/internal/domain"
 	"github.com/RianNegreiros/go-graphql-api/internal/jwt"
 	"github.com/RianNegreiros/go-graphql-api/internal/postgres"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 	db := postgres.New(ctx, conf)
 
 	if err := db.Migrate(); err != nil {
-		log.Fatalf("error migrating postgres: %v", err)
+		log.Fatal(err)
 	}
 
 	router := chi.NewRouter()
@@ -41,10 +41,10 @@ func main() {
 	userRepo := postgres.NewUserRepo(db)
 
 	authTokenService := jwt.NewTokenService(conf)
-	authService := domain.NewAuthService(userRepo)
+	authService := domain.NewAuthService(userRepo, authTokenService)
 
 	router.Use(authMiddleware(authTokenService))
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/", playground.Handler("Graphql playground", "/query"))
 	router.Handle("/query", handler.NewDefaultServer(
 		graph.NewExecutableSchema(
 			graph.Config{
@@ -55,8 +55,5 @@ func main() {
 		),
 	))
 
-	err := http.ListenAndServe(":8080", router)
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Fatal(http.ListenAndServe(":8080", router))
 }

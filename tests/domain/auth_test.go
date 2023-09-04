@@ -40,7 +40,12 @@ func TestAuthService_Register(t *testing.T) {
 				Password: "hashed_password",
 			}, nil)
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		authTokenService.On("CreateAccessToken", mock.Anything, mock.Anything).
+			Return("access_token", nil)
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		res, err := service.Register(ctx, validInput)
 		require.NoError(t, err)
@@ -52,6 +57,7 @@ func TestAuthService_Register(t *testing.T) {
 		require.NotEmpty(t, res.User.Password)
 
 		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("username taken", func(t *testing.T) {
@@ -62,13 +68,16 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).
 			Return(user.UserModel{}, nil)
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		_, err := service.Register(ctx, validInput)
 		require.ErrorIs(t, err, user.ErrUsernameTaken)
 
 		userRepo.AssertNotCalled(t, "Create")
 		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("email taken", func(t *testing.T) {
@@ -82,13 +91,16 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
 			Return(user.UserModel{}, nil)
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		_, err := service.Register(ctx, validInput)
 		require.ErrorIs(t, err, user.ErrEmailTaken)
 
 		userRepo.AssertNotCalled(t, "Create")
 		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("error creating user", func(t *testing.T) {
@@ -105,12 +117,15 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo.On("Create", mock.Anything, mock.Anything).
 			Return(user.UserModel{}, errors.New("some error"))
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		_, err := service.Register(ctx, validInput)
 		require.Error(t, err)
 
 		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("invalid input", func(t *testing.T) {
@@ -118,7 +133,9 @@ func TestAuthService_Register(t *testing.T) {
 
 		userRepo := &mocks.UserRepo{}
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		_, err := service.Register(ctx, user.RegisterInput{})
 		require.Error(t, err)
@@ -127,6 +144,39 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo.AssertNotCalled(t, "GetByEmail")
 		userRepo.AssertNotCalled(t, "Create")
 		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
+	})
+
+	t.Run("can't generate access token", func(t *testing.T) {
+		ctx := context.Background()
+
+		userRepo := &mocks.UserRepo{}
+
+		userRepo.On("GetByUsername", mock.Anything, mock.Anything).
+			Return(user.UserModel{}, user.ErrNotFound)
+
+		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
+			Return(user.UserModel{}, user.ErrNotFound)
+
+		userRepo.On("Create", mock.Anything, mock.Anything).
+			Return(user.UserModel{
+				ID:       "123",
+				Username: validInput.Username,
+				Email:    validInput.Email,
+			}, nil)
+
+		authTokenService := &mocks.AuthTokenService{}
+
+		authTokenService.On("CreateAccessToken", mock.Anything, mock.Anything).
+			Return("", errors.New("error"))
+
+		service := domain.NewAuthService(userRepo, authTokenService)
+
+		_, err := service.Register(ctx, validInput)
+		require.ErrorIs(t, err, user.ErrGenerateToken)
+
+		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 }
 
@@ -152,7 +202,12 @@ func TestAuthService_Login(t *testing.T) {
 				Password: string(hashedPassword),
 			}, nil)
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		authTokenService.On("CreateAccessToken", mock.Anything, mock.Anything).
+			Return("access_token", nil)
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		res, err := service.Login(ctx, validInput)
 		require.NoError(t, err)
@@ -163,6 +218,7 @@ func TestAuthService_Login(t *testing.T) {
 		require.Equal(t, validInput.Email, res.User.Email)
 
 		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("invalid email", func(t *testing.T) {
@@ -173,12 +229,15 @@ func TestAuthService_Login(t *testing.T) {
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
 			Return(user.UserModel{}, user.ErrNotFound)
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		_, err := service.Login(ctx, validInput)
 		require.ErrorIs(t, err, user.ErrInvalidCredentials)
 
 		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("get user by email error", func(t *testing.T) {
@@ -189,12 +248,15 @@ func TestAuthService_Login(t *testing.T) {
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).
 			Return(user.UserModel{}, errors.New("some error"))
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		_, err := service.Login(ctx, validInput)
 		require.Error(t, err)
 
 		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("invalid input", func(t *testing.T) {
@@ -202,7 +264,9 @@ func TestAuthService_Login(t *testing.T) {
 
 		userRepo := &mocks.UserRepo{}
 
-		service := domain.NewAuthService(userRepo)
+		authTokenService := &mocks.AuthTokenService{}
+
+		service := domain.NewAuthService(userRepo, authTokenService)
 
 		_, err := service.Login(ctx, user.LoginInput{})
 		require.ErrorIs(t, err, user.ErrValidation)

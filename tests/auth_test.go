@@ -89,7 +89,7 @@ func TestRegisterInput_Sanitize(t *testing.T) {
 		ConfirmPassword: "123456",
 	}
 
-	input = input.Sanitize()
+	input.Sanitize()
 
 	require.Equal(t, want, input)
 }
@@ -150,7 +150,7 @@ func TestLoginInput_Sanitize(t *testing.T) {
 		Password: "123456",
 	}
 
-	input = input.Sanitize()
+	input.Sanitize()
 
 	require.Equal(t, want, input)
 }
