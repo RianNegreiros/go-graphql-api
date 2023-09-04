@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/RianNegreiros/go-graphql-api/domain"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/RianNegreiros/go-graphql-api/domain"
+	"github.com/RianNegreiros/go-graphql-api/jwt"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -39,8 +41,10 @@ func main() {
 
 	userRepo := postgres.NewUserRepo(db)
 
+	authTokenService := jwt.NewTokenService(conf)
 	authService := domain.NewAuthService(userRepo)
 
+	router.Use(authMiddleware(authTokenService))
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", handler.NewDefaultServer(
 		graph.NewExecutableSchema(
