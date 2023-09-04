@@ -45,21 +45,16 @@ func (m *mutationResolver) CreatePost(ctx context.Context, input CreatePostInput
 	return mapPost(p), nil
 }
 
+func (t *postResolver) User(ctx context.Context, obj *Post) (*User, error) {
+	return DataloaderFor(ctx).UserByID.Load(obj.UserID)
+}
+
 func (m *mutationResolver) DeletePost(ctx context.Context, id string) (bool, error) {
 	if err := m.PostService.Delete(ctx, id); err != nil {
 		return false, buildError(ctx, err)
 	}
 
 	return true, nil
-}
-
-func (t *postResolver) User(ctx context.Context, obj *Post) (*User, error) {
-	user, err := t.UserService.GetByID(ctx, obj.UserID)
-	if err != nil {
-		return nil, buildError(ctx, err)
-	}
-
-	return mapUser(user), nil
 }
 
 func (m *mutationResolver) CreateReply(ctx context.Context, parentID string, input CreatePostInput) (*Post, error) {
