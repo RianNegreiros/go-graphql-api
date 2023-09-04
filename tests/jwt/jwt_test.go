@@ -8,6 +8,7 @@ import (
 	"github.com/lestrrat-go/jwx/jwa"
 	jwtGo "github.com/lestrrat-go/jwx/jwt"
 	"github.com/stretchr/testify/require"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
@@ -131,6 +132,76 @@ func TestTokenService_ParseToken(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = tokenService.ParseToken(ctx, token)
+		require.ErrorIs(t, err, models.ErrInvalidToken)
+
+		teardownTimeNow(t)
+	})
+}
+
+func TestTokenService_ParseTokenFromRequest(t *testing.T) {
+	t.Run("should parse valid token", func(t *testing.T) {
+		ctx := context.Background()
+		user := models.User{
+			ID: "1",
+		}
+
+		req := httptest.NewRequest("GET", "/", nil)
+
+		accessToken, err := tokenService.CreateAccessToken(ctx, user)
+		require.NoError(t, err)
+
+		req.Header.Set("Authorization", accessToken)
+
+		tok, err := tokenService.ParseTokenFromRequest(ctx, req)
+		require.NoError(t, err)
+
+		require.Equal(t, user.ID, tok.Sub)
+
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+
+		tok, err = tokenService.ParseTokenFromRequest(ctx, req)
+		require.NoError(t, err)
+
+		require.Equal(t, user.ID, tok.Sub)
+	})
+
+	t.Run("should return error when token is invalid", func(t *testing.T) {
+		ctx := context.Background()
+		user := models.User{
+			ID: "1",
+		}
+
+		req := httptest.NewRequest("GET", "/", nil)
+
+		accessToken, err := tokenService.CreateAccessToken(ctx, user)
+		require.NoError(t, err)
+
+		req.Header.Set("Authorization", accessToken+"invalid")
+
+		tok, err := tokenService.ParseTokenFromRequest(ctx, req)
+		require.Error(t, err)
+		require.Equal(t, models.ErrInvalidToken, err)
+		require.Equal(t, models.AuthToken{}, tok)
+	})
+
+	t.Run("should return error when token is expired", func(t *testing.T) {
+		ctx := context.Background()
+		user := models.User{
+			ID: "1",
+		}
+
+		req := httptest.NewRequest("GET", "/", nil)
+
+		jwt.Now = func() time.Time {
+			return time.Now().Add(-jwt.AccessTokenLifeTime * 5)
+		}
+
+		accessToken, err := tokenService.CreateAccessToken(ctx, user)
+		require.NoError(t, err)
+
+		req.Header.Set("Authorization", accessToken)
+
+		_, err = tokenService.ParseTokenFromRequest(ctx, req)
 		require.ErrorIs(t, err, models.ErrInvalidToken)
 
 		teardownTimeNow(t)
