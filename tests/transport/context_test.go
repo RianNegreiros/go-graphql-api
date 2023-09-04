@@ -36,3 +36,15 @@ func TestGetUserIDFromContext(t *testing.T) {
 
 	})
 }
+
+func TestPutUserIDIntoContext(t *testing.T) {
+	t.Run("add user id into context", func(t *testing.T) {
+		ctx := context.Background()
+
+		ctx = transport.PutUserIDIntoContext(ctx, "123")
+
+		userID, err := transport.GetUserIDFromContext(ctx)
+		require.NoError(t, err)
+		require.Equal(t, "123", userID)
+	})
+}

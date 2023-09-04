@@ -23,3 +23,7 @@ func GetUserIDFromContext(ctx context.Context) (string, error) {
 
 	return userID, nil
 }
+
+func PutUserIDIntoContext(ctx context.Context, id string) context.Context {
+	return context.WithValue(ctx, ContextAuthIDKey, id)
+}
