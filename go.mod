@@ -12,11 +12,12 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/vektah/gqlparser/v2 v2.1.0
 	golang.org/x/crypto v0.9.0
-	golang.org/x/text v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 )
 
 require (
 	github.com/georgysavva/scany/v2 v2.0.0
+	github.com/google/uuid v1.1.2
 	github.com/jackc/pgx/v5 v5.4.3
 )
 

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/RianNegreiros/go-graphql-api/internal/user"
-	"github.com/RianNegreiros/go-graphql-api/tests"
+	"github.com/RianNegreiros/go-graphql-api/tests/test_helpers"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,7 +22,7 @@ func TestIntegrationAuthService_Register(t *testing.T) {
 	t.Run("valid input", func(t *testing.T) {
 		ctx := context.Background()
 
-		defer tests.TeardownDB(ctx, t, db)
+		defer test_helpers.TeardownDB(ctx, t, db)
 
 		res, err := authService.Register(ctx, validInput)
 		require.NoError(t, err)
@@ -38,7 +38,7 @@ func TestIntegrationAuthService_Register(t *testing.T) {
 	t.Run("username taken", func(t *testing.T) {
 		ctx := context.Background()
 
-		defer tests.TeardownDB(ctx, t, db)
+		defer test_helpers.TeardownDB(ctx, t, db)
 
 		_, err := authService.Register(ctx, validInput)
 		require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestIntegrationAuthService_Register(t *testing.T) {
 	t.Run("email taken", func(t *testing.T) {
 		ctx := context.Background()
 
-		defer tests.TeardownDB(ctx, t, db)
+		defer test_helpers.TeardownDB(ctx, t, db)
 
 		_, err := authService.Register(ctx, validInput)
 		require.NoError(t, err)
