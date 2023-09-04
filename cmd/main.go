@@ -46,6 +46,12 @@ func main() {
 	postService := domain.NewPostService(postRepo)
 	userService := domain.NewUserService(userRepo)
 
+	router.Use(graph.DataloaderMiddleware(
+		&graph.Repos{
+			UserRepo: userRepo,
+		},
+	))
+
 	router.Use(authMiddleware(authTokenService))
 	router.Handle("/", playground.Handler("Graphql playground", "/query"))
 	router.Handle("/query", handler.NewDefaultServer(
