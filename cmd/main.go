@@ -39,9 +39,11 @@ func main() {
 	router.Use(middleware.Timeout(time.Second * 60))
 
 	userRepo := postgres.NewUserRepo(db)
+	postRepo := postgres.NewPostRepo(db)
 
 	authTokenService := jwt.NewTokenService(conf)
 	authService := domain.NewAuthService(userRepo, authTokenService)
+	postService := domain.NewPostService(postRepo)
 
 	router.Use(authMiddleware(authTokenService))
 	router.Handle("/", playground.Handler("Graphql playground", "/query"))
@@ -50,6 +52,7 @@ func main() {
 			graph.Config{
 				Resolvers: &graph.Resolver{
 					AuthService: authService,
+					PostService: postService,
 				},
 			},
 		),

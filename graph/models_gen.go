@@ -11,9 +11,22 @@ type AuthResponse struct {
 	User        *User  `json:"user"`
 }
 
+type CreatePostInput struct {
+	Body string `json:"body"`
+}
+
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type Post struct {
+	ID        string    `json:"id"`
+	Body      string    `json:"body"`
+	Username  string    `json:"username"`
+	User      *User     `json:"user"`
+	UserID    string    `json:"userID"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type RegisterInput struct {
