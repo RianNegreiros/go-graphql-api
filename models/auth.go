@@ -14,6 +14,7 @@ var (
 	ErrValidation         = errors.New("validation error")
 	ErrNotFound           = errors.New("not found")
 	ErrInvalidToken       = errors.New("invalid token")
+	ErrNoUserIDInContext  = errors.New("no user id in context")
 )
 
 var (
