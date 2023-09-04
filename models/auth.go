@@ -12,6 +12,7 @@ var (
 	ErrInvalidCredentials = errors.New("invalid email or password")
 	ErrValidation         = errors.New("validation error")
 	ErrNotFound           = errors.New("not found")
+	ErrInvalidToken       = errors.New("invalid token")
 )
 
 var (
@@ -24,9 +25,26 @@ type AuthService interface {
 	Login(ctx context.Context, input LoginInput) (AuthResponse, error)
 }
 
+type AuthResponse struct {
+	AccessToken string
+	User        User
+}
+
+type RegisterInput struct {
+	Username        string
+	Email           string
+	Password        string
+	ConfirmPassword string
+}
+
 type LoginInput struct {
 	Email    string
 	Password string
+}
+
+type AuthToken struct {
+	ID  string
+	Sub string
 }
 
 func (i LoginInput) Sanitize() LoginInput {
@@ -48,18 +66,6 @@ func (i LoginInput) Validate() error {
 	}
 
 	return nil
-}
-
-type RegisterInput struct {
-	Username        string
-	Email           string
-	Password        string
-	ConfirmPassword string
-}
-
-type AuthResponse struct {
-	AccessToken string
-	User        User
 }
 
 func (i RegisterInput) Validate() error {
