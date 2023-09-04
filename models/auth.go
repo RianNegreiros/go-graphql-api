@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/mail"
 	"strings"
 )
@@ -23,6 +24,12 @@ var (
 type AuthService interface {
 	Register(ctx context.Context, input RegisterInput) (AuthResponse, error)
 	Login(ctx context.Context, input LoginInput) (AuthResponse, error)
+}
+type AuthTokenService interface {
+	CreateAccessToken(ctx context.Context, user User) (string, error)
+	CreateRefreshToken(ctx context.Context, user User, tokenID string) (string, error)
+	ParseToken(ctx context.Context, payload string) (AuthToken, error)
+	ParseTokenFromRequest(ctx context.Context, r *http.Request) (AuthToken, error)
 }
 
 type AuthResponse struct {

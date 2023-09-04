@@ -12,7 +12,10 @@ import (
 	"time"
 )
 
-var signatureType = jwa.HS256
+var (
+	signatureType = jwa.HS256
+	now           = time.Now()
+)
 
 type TokenService struct {
 	Conf *config.Config
@@ -100,11 +103,11 @@ func setDefaultToken(t jwtGo.Token, user models.User, lifetime time.Duration, co
 		return fmt.Errorf("failed to set jwt issuer at: %w", err)
 	}
 
-	if err := t.Set(jwtGo.IssuedAtKey, time.Now().Unix()); err != nil {
+	if err := t.Set(jwtGo.IssuedAtKey, now.Unix()); err != nil {
 		return fmt.Errorf("failed to set jwt issued at: %w", err)
 	}
 
-	if err := t.Set(jwtGo.ExpirationKey, time.Now().Add(lifetime)); err != nil {
+	if err := t.Set(jwtGo.ExpirationKey, now.Add(lifetime)); err != nil {
 		return fmt.Errorf("failed to set jwt expiration: %w", err)
 	}
 
