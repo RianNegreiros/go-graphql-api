@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/RianNegreiros/go-graphql-api/models"
-	"github.com/RianNegreiros/go-graphql-api/transport"
 	"net/http"
+
+	"github.com/RianNegreiros/go-graphql-api/internal/transport"
+	"github.com/RianNegreiros/go-graphql-api/internal/user"
 )
 
-func authMiddleware(service models.AuthTokenService) func(handler http.Handler) http.Handler {
+func authMiddleware(service user.AuthTokenService) func(handler http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

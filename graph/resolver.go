@@ -2,16 +2,17 @@ package graph
 
 import (
 	"context"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/RianNegreiros/go-graphql-api/models"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 	"net/http"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/RianNegreiros/go-graphql-api/internal/user"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 //go:generate go run github.com/99designs/gqlgen
 
 type Resolver struct {
-	AuthService models.AuthService
+	AuthService user.AuthService
 }
 
 type queryResolver struct{ *Resolver }

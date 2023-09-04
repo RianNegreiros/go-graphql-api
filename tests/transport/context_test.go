@@ -2,10 +2,11 @@ package transport
 
 import (
 	"context"
-	"github.com/RianNegreiros/go-graphql-api/models"
-	"github.com/RianNegreiros/go-graphql-api/transport"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/RianNegreiros/go-graphql-api/internal/transport"
+	"github.com/RianNegreiros/go-graphql-api/internal/user"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetUserIDFromContext(t *testing.T) {
@@ -23,7 +24,7 @@ func TestGetUserIDFromContext(t *testing.T) {
 		ctx := context.Background()
 
 		_, err := transport.GetUserIDFromContext(ctx)
-		require.ErrorIs(t, err, models.ErrNoUserIDInContext)
+		require.ErrorIs(t, err, user.ErrNoUserIDInContext)
 	})
 
 	t.Run("return error if value is not a string", func(t *testing.T) {
@@ -32,7 +33,7 @@ func TestGetUserIDFromContext(t *testing.T) {
 		ctx = context.WithValue(ctx, transport.ContextAuthIDKey, 123)
 
 		_, err := transport.GetUserIDFromContext(ctx)
-		require.ErrorIs(t, err, models.ErrNoUserIDInContext)
+		require.ErrorIs(t, err, user.ErrNoUserIDInContext)
 
 	})
 }

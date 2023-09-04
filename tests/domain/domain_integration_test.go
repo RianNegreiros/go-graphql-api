@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/RianNegreiros/go-graphql-api/config"
-	"github.com/RianNegreiros/go-graphql-api/domain"
-	"github.com/RianNegreiros/go-graphql-api/postgres"
+	"github.com/RianNegreiros/go-graphql-api/internal/domain"
+	"github.com/RianNegreiros/go-graphql-api/internal/postgres"
 )
 
 var (

@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/RianNegreiros/go-graphql-api/domain"
-	"github.com/RianNegreiros/go-graphql-api/jwt"
-
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/RianNegreiros/go-graphql-api/config"
 	"github.com/RianNegreiros/go-graphql-api/graph"
-	"github.com/RianNegreiros/go-graphql-api/postgres"
+	"github.com/RianNegreiros/go-graphql-api/internal/domain"
+	"github.com/RianNegreiros/go-graphql-api/internal/jwt"
+	"github.com/RianNegreiros/go-graphql-api/internal/postgres"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )

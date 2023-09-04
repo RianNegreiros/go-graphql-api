@@ -6,13 +6,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/RianNegreiros/go-graphql-api/models"
+	"github.com/RianNegreiros/go-graphql-api/internal/user"
 	"github.com/RianNegreiros/go-graphql-api/tests"
 	"github.com/stretchr/testify/require"
 )
 
 func TestIntegrationAuthService_Register(t *testing.T) {
-	validInput := models.RegisterInput{
+	validInput := user.RegisterInput{
 		Username:        "john",
 		Email:           "johndoe@mail.com",
 		Password:        "123456",
@@ -43,13 +43,13 @@ func TestIntegrationAuthService_Register(t *testing.T) {
 		_, err := authService.Register(ctx, validInput)
 		require.NoError(t, err)
 
-		_, err = authService.Register(ctx, models.RegisterInput{
+		_, err = authService.Register(ctx, user.RegisterInput{
 			Username:        validInput.Username,
 			Email:           "johndoe@mail.com",
 			Password:        "123456",
 			ConfirmPassword: "123456",
 		})
-		require.ErrorIs(t, err, models.ErrUsernameTaken)
+		require.ErrorIs(t, err, user.ErrUsernameTaken)
 	})
 
 	t.Run("email taken", func(t *testing.T) {
@@ -60,13 +60,13 @@ func TestIntegrationAuthService_Register(t *testing.T) {
 		_, err := authService.Register(ctx, validInput)
 		require.NoError(t, err)
 
-		_, err = authService.Register(ctx, models.RegisterInput{
+		_, err = authService.Register(ctx, user.RegisterInput{
 			Username:        "john2",
 			Email:           validInput.Email,
 			Password:        "123456",
 			ConfirmPassword: "123456",
 		})
 
-		require.ErrorIs(t, err, models.ErrEmailTaken)
+		require.ErrorIs(t, err, user.ErrEmailTaken)
 	})
 }

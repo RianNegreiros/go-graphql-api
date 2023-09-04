@@ -3,13 +3,14 @@ package jwt
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/RianNegreiros/go-graphql-api/config"
-	"github.com/RianNegreiros/go-graphql-api/models"
+	"github.com/RianNegreiros/go-graphql-api/internal/user"
 	_ "github.com/lestrrat-go/jwx"
 	"github.com/lestrrat-go/jwx/jwa"
 	jwtGo "github.com/lestrrat-go/jwx/jwt"
-	"net/http"
-	"time"
 )
 
 var (
@@ -25,7 +26,7 @@ func NewTokenService(conf *config.Config) *TokenService {
 	return &TokenService{Conf: conf}
 }
 
-func (s *TokenService) ParseTokenFromRequest(ctx context.Context, r *http.Request) (models.AuthToken, error) {
+func (s *TokenService) ParseTokenFromRequest(ctx context.Context, r *http.Request) (user.AuthToken, error) {
 	token, err := jwtGo.ParseRequest(
 		r,
 		jwtGo.WithValidate(true),
@@ -33,20 +34,20 @@ func (s *TokenService) ParseTokenFromRequest(ctx context.Context, r *http.Reques
 		jwtGo.WithVerify(signatureType, []byte(s.Conf.JWT.Secret)),
 	)
 	if err != nil {
-		return models.AuthToken{}, models.ErrInvalidToken
+		return user.AuthToken{}, user.ErrInvalidToken
 	}
 
 	return buildToken(token), nil
 }
 
-func buildToken(token jwtGo.Token) models.AuthToken {
-	return models.AuthToken{
+func buildToken(token jwtGo.Token) user.AuthToken {
+	return user.AuthToken{
 		ID:  token.JwtID(),
 		Sub: token.Subject(),
 	}
 }
 
-func (s *TokenService) ParseToken(ctx context.Context, payload string) (models.AuthToken, error) {
+func (s *TokenService) ParseToken(ctx context.Context, payload string) (user.AuthToken, error) {
 	token, err := jwtGo.Parse(
 		[]byte(payload),
 		jwtGo.WithValidate(true),
@@ -54,13 +55,13 @@ func (s *TokenService) ParseToken(ctx context.Context, payload string) (models.A
 		jwtGo.WithVerify(signatureType, []byte(s.Conf.JWT.Secret)),
 	)
 	if err != nil {
-		return models.AuthToken{}, models.ErrInvalidToken
+		return user.AuthToken{}, user.ErrInvalidToken
 	}
 
 	return buildToken(token), nil
 }
 
-func (s *TokenService) CreateRefreshToken(ctx context.Context, user models.User, tokenID string) (string, error) {
+func (s *TokenService) CreateRefreshToken(ctx context.Context, user user.UserModel, tokenID string) (string, error) {
 	t := jwtGo.New()
 
 	if err := setDefaultToken(t, user, RefreshTokenLifeTime, s.Conf); err != nil {
@@ -79,7 +80,7 @@ func (s *TokenService) CreateRefreshToken(ctx context.Context, user models.User,
 	return string(token), nil
 }
 
-func (s *TokenService) CreateAccessToken(ctx context.Context, user models.User) (string, error) {
+func (s *TokenService) CreateAccessToken(ctx context.Context, user user.UserModel) (string, error) {
 	t := jwtGo.New()
 
 	if err := setDefaultToken(t, user, AccessTokenLifeTime, s.Conf); err != nil {
@@ -94,7 +95,7 @@ func (s *TokenService) CreateAccessToken(ctx context.Context, user models.User) 
 	return string(token), nil
 }
 
-func setDefaultToken(t jwtGo.Token, user models.User, lifetime time.Duration, conf *config.Config) error {
+func setDefaultToken(t jwtGo.Token, user user.UserModel, lifetime time.Duration, conf *config.Config) error {
 	if err := t.Set(jwtGo.SubjectKey, user.ID); err != nil {
 		return fmt.Errorf("failed to set jwt subject: %w", err)
 	}

@@ -1,4 +1,4 @@
-package models
+package user
 
 import (
 	"context"
@@ -12,12 +12,12 @@ var (
 )
 
 type UserRepo interface {
-	Create(ctx context.Context, user User) (User, error)
-	GetByUsername(ctx context.Context, username string) (User, error)
-	GetByEmail(ctx context.Context, email string) (User, error)
+	Create(ctx context.Context, user UserModel) (UserModel, error)
+	GetByUsername(ctx context.Context, username string) (UserModel, error)
+	GetByEmail(ctx context.Context, email string) (UserModel, error)
 }
 
-type User struct {
+type UserModel struct {
 	ID        string
 	Username  string
 	Email     string

@@ -2,16 +2,17 @@ package jwt
 
 import (
 	"context"
-	"github.com/RianNegreiros/go-graphql-api/config"
-	"github.com/RianNegreiros/go-graphql-api/jwt"
-	"github.com/RianNegreiros/go-graphql-api/models"
-	"github.com/lestrrat-go/jwx/jwa"
-	jwtGo "github.com/lestrrat-go/jwx/jwt"
-	"github.com/stretchr/testify/require"
 	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/RianNegreiros/go-graphql-api/config"
+	"github.com/RianNegreiros/go-graphql-api/internal/jwt"
+	"github.com/RianNegreiros/go-graphql-api/internal/user"
+	"github.com/lestrrat-go/jwx/jwa"
+	jwtGo "github.com/lestrrat-go/jwx/jwt"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -31,11 +32,11 @@ func TestMain(m *testing.M) {
 func TestTokenService_CreateAccessToken(t *testing.T) {
 	t.Run("should create access token", func(t *testing.T) {
 		ctx := context.Background()
-		user := models.User{
+		u := user.UserModel{
 			ID: "1",
 		}
 
-		token, err := tokenService.CreateAccessToken(ctx, user)
+		token, err := tokenService.CreateAccessToken(ctx, u)
 		require.NoError(t, err)
 
 		jwt.Now = func() time.Time {
@@ -50,7 +51,7 @@ func TestTokenService_CreateAccessToken(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		require.Equal(t, user.ID, tok.Subject())
+		require.Equal(t, u.ID, tok.Subject())
 		require.Equal(t, jwt.Now().Add(jwt.AccessTokenLifeTime).Unix(), tok.Expiration().Unix())
 
 		teardownTimeNow(t)
@@ -60,11 +61,11 @@ func TestTokenService_CreateAccessToken(t *testing.T) {
 func TestTokenService_CreateRefreshToken(t *testing.T) {
 	t.Run("should create refresh token", func(t *testing.T) {
 		ctx := context.Background()
-		user := models.User{
+		u := user.UserModel{
 			ID: "1",
 		}
 
-		token, err := tokenService.CreateRefreshToken(ctx, user, "2")
+		token, err := tokenService.CreateRefreshToken(ctx, u, "2")
 		require.NoError(t, err)
 
 		jwt.Now = func() time.Time {
@@ -79,7 +80,7 @@ func TestTokenService_CreateRefreshToken(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		require.Equal(t, user.ID, tok.Subject())
+		require.Equal(t, u.ID, tok.Subject())
 		require.Equal(t, "2", tok.JwtID())
 		require.Equal(t, jwt.Now().Add(jwt.RefreshTokenLifeTime).Unix(), tok.Expiration().Unix())
 
@@ -90,37 +91,37 @@ func TestTokenService_CreateRefreshToken(t *testing.T) {
 func TestTokenService_ParseToken(t *testing.T) {
 	t.Run("should parse valid token", func(t *testing.T) {
 		ctx := context.Background()
-		user := models.User{
+		u := user.UserModel{
 			ID: "1",
 		}
 
-		token, err := tokenService.CreateAccessToken(ctx, user)
+		token, err := tokenService.CreateAccessToken(ctx, u)
 		require.NoError(t, err)
 
 		tok, err := tokenService.ParseToken(ctx, token)
 		require.NoError(t, err)
 
-		require.Equal(t, user.ID, tok.Sub)
+		require.Equal(t, u.ID, tok.Sub)
 	})
 
 	t.Run("should return error when token is invalid", func(t *testing.T) {
 		ctx := context.Background()
-		user := models.User{
+		u := user.UserModel{
 			ID: "1",
 		}
 
-		token, err := tokenService.CreateAccessToken(ctx, user)
+		token, err := tokenService.CreateAccessToken(ctx, u)
 		require.NoError(t, err)
 
 		tok, err := tokenService.ParseToken(ctx, token+"invalid")
 		require.Error(t, err)
-		require.Equal(t, models.ErrInvalidToken, err)
-		require.Equal(t, models.AuthToken{}, tok)
+		require.Equal(t, user.ErrInvalidToken, err)
+		require.Equal(t, user.AuthToken{}, tok)
 	})
 
 	t.Run("should return error when token is expired", func(t *testing.T) {
 		ctx := context.Background()
-		user := models.User{
+		u := user.UserModel{
 			ID: "1",
 		}
 
@@ -128,11 +129,11 @@ func TestTokenService_ParseToken(t *testing.T) {
 			return time.Now().Add(-jwt.AccessTokenLifeTime * 5)
 		}
 
-		token, err := tokenService.CreateAccessToken(ctx, user)
+		token, err := tokenService.CreateAccessToken(ctx, u)
 		require.NoError(t, err)
 
 		_, err = tokenService.ParseToken(ctx, token)
-		require.ErrorIs(t, err, models.ErrInvalidToken)
+		require.ErrorIs(t, err, user.ErrInvalidToken)
 
 		teardownTimeNow(t)
 	})
@@ -141,13 +142,13 @@ func TestTokenService_ParseToken(t *testing.T) {
 func TestTokenService_ParseTokenFromRequest(t *testing.T) {
 	t.Run("should parse valid token", func(t *testing.T) {
 		ctx := context.Background()
-		user := models.User{
+		u := user.UserModel{
 			ID: "1",
 		}
 
 		req := httptest.NewRequest("GET", "/", nil)
 
-		accessToken, err := tokenService.CreateAccessToken(ctx, user)
+		accessToken, err := tokenService.CreateAccessToken(ctx, u)
 		require.NoError(t, err)
 
 		req.Header.Set("Authorization", accessToken)
@@ -155,38 +156,38 @@ func TestTokenService_ParseTokenFromRequest(t *testing.T) {
 		tok, err := tokenService.ParseTokenFromRequest(ctx, req)
 		require.NoError(t, err)
 
-		require.Equal(t, user.ID, tok.Sub)
+		require.Equal(t, u.ID, tok.Sub)
 
 		req.Header.Set("Authorization", "Bearer "+accessToken)
 
 		tok, err = tokenService.ParseTokenFromRequest(ctx, req)
 		require.NoError(t, err)
 
-		require.Equal(t, user.ID, tok.Sub)
+		require.Equal(t, u.ID, tok.Sub)
 	})
 
 	t.Run("should return error when token is invalid", func(t *testing.T) {
 		ctx := context.Background()
-		user := models.User{
+		u := user.UserModel{
 			ID: "1",
 		}
 
 		req := httptest.NewRequest("GET", "/", nil)
 
-		accessToken, err := tokenService.CreateAccessToken(ctx, user)
+		accessToken, err := tokenService.CreateAccessToken(ctx, u)
 		require.NoError(t, err)
 
 		req.Header.Set("Authorization", accessToken+"invalid")
 
 		tok, err := tokenService.ParseTokenFromRequest(ctx, req)
 		require.Error(t, err)
-		require.Equal(t, models.ErrInvalidToken, err)
-		require.Equal(t, models.AuthToken{}, tok)
+		require.Equal(t, user.ErrInvalidToken, err)
+		require.Equal(t, user.AuthToken{}, tok)
 	})
 
 	t.Run("should return error when token is expired", func(t *testing.T) {
 		ctx := context.Background()
-		user := models.User{
+		u := user.UserModel{
 			ID: "1",
 		}
 
@@ -196,13 +197,13 @@ func TestTokenService_ParseTokenFromRequest(t *testing.T) {
 			return time.Now().Add(-jwt.AccessTokenLifeTime * 5)
 		}
 
-		accessToken, err := tokenService.CreateAccessToken(ctx, user)
+		accessToken, err := tokenService.CreateAccessToken(ctx, u)
 		require.NoError(t, err)
 
 		req.Header.Set("Authorization", accessToken)
 
 		_, err = tokenService.ParseTokenFromRequest(ctx, req)
-		require.ErrorIs(t, err, models.ErrInvalidToken)
+		require.ErrorIs(t, err, user.ErrInvalidToken)
 
 		teardownTimeNow(t)
 	})

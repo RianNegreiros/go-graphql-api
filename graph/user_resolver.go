@@ -3,10 +3,11 @@ package graph
 import (
 	"context"
 	"fmt"
-	"github.com/RianNegreiros/go-graphql-api/models"
+
+	"github.com/RianNegreiros/go-graphql-api/internal/user"
 )
 
-func mapUser(user models.User) *User {
+func mapUser(user user.UserModel) *User {
 	return &User{
 		ID:        user.ID,
 		Email:     user.Email,

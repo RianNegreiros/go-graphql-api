@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/RianNegreiros/go-graphql-api/postgres"
+	"github.com/RianNegreiros/go-graphql-api/internal/postgres"
 	"github.com/stretchr/testify/require"
 )
 

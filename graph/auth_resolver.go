@@ -3,10 +3,11 @@ package graph
 import (
 	"context"
 	"errors"
-	"github.com/RianNegreiros/go-graphql-api/models"
+
+	"github.com/RianNegreiros/go-graphql-api/internal/user"
 )
 
-func mapAuthResponse(authResponse models.AuthResponse) *AuthResponse {
+func mapAuthResponse(authResponse user.AuthResponse) *AuthResponse {
 	return &AuthResponse{
 		AccessToken: authResponse.AccessToken,
 		User:        mapUser(authResponse.User),
@@ -14,7 +15,7 @@ func mapAuthResponse(authResponse models.AuthResponse) *AuthResponse {
 }
 
 func (m *mutationResolver) Register(ctx context.Context, input RegisterInput) (*AuthResponse, error) {
-	res, err := m.AuthService.Register(ctx, models.RegisterInput{
+	res, err := m.AuthService.Register(ctx, user.RegisterInput{
 		Email:           input.Email,
 		Username:        input.Username,
 		Password:        input.Password,
@@ -22,9 +23,9 @@ func (m *mutationResolver) Register(ctx context.Context, input RegisterInput) (*
 	})
 	if err != nil {
 		switch {
-		case errors.Is(err, models.ErrValidation) ||
-			errors.Is(err, models.ErrEmailTaken) ||
-			errors.Is(err, models.ErrUsernameTaken):
+		case errors.Is(err, user.ErrValidation) ||
+			errors.Is(err, user.ErrEmailTaken) ||
+			errors.Is(err, user.ErrUsernameTaken):
 			return nil, buildBadRequestError(ctx, err)
 		default:
 			return nil, err
@@ -35,14 +36,14 @@ func (m *mutationResolver) Register(ctx context.Context, input RegisterInput) (*
 }
 
 func (m *mutationResolver) Login(ctx context.Context, input LoginInput) (*AuthResponse, error) {
-	res, err := m.AuthService.Login(ctx, models.LoginInput{
+	res, err := m.AuthService.Login(ctx, user.LoginInput{
 		Email:    input.Email,
 		Password: input.Password,
 	})
 	if err != nil {
 		switch {
-		case errors.Is(err, models.ErrValidation) ||
-			errors.Is(err, models.ErrInvalidCredentials):
+		case errors.Is(err, user.ErrValidation) ||
+			errors.Is(err, user.ErrInvalidCredentials):
 			return nil, buildBadRequestError(ctx, err)
 		default:
 			return nil, err

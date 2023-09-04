@@ -1,4 +1,4 @@
-package models
+package user
 
 import (
 	"context"
@@ -28,15 +28,15 @@ type AuthService interface {
 }
 
 type AuthTokenService interface {
-	CreateAccessToken(ctx context.Context, user User) (string, error)
-	CreateRefreshToken(ctx context.Context, user User, tokenID string) (string, error)
+	CreateAccessToken(ctx context.Context, user UserModel) (string, error)
+	CreateRefreshToken(ctx context.Context, user UserModel, tokenID string) (string, error)
 	ParseToken(ctx context.Context, payload string) (AuthToken, error)
 	ParseTokenFromRequest(ctx context.Context, r *http.Request) (AuthToken, error)
 }
 
 type AuthResponse struct {
 	AccessToken string
-	User        User
+	User        UserModel
 }
 
 type RegisterInput struct {
