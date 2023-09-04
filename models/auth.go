@@ -29,9 +29,13 @@ type LoginInput struct {
 	Password string
 }
 
-func (in *LoginInput) Sanitize() {
-	in.Email = strings.TrimSpace(in.Email)
-	in.Email = strings.ToLower(in.Email)
+func (i LoginInput) Sanitize() LoginInput {
+	i.Email = strings.TrimSpace(i.Email)
+	i.Email = strings.ToLower(i.Email)
+
+	i.Password = strings.TrimSpace(i.Password)
+
+	return i
 }
 
 func (i LoginInput) Validate() error {
@@ -58,29 +62,33 @@ type AuthResponse struct {
 	User        User
 }
 
-func (r RegisterInput) Validate() error {
-	if len(r.Username) < UsernameMinLength {
+func (i RegisterInput) Validate() error {
+	if len(i.Username) < UsernameMinLength {
 		return fmt.Errorf("%w: username must be at least %d characters long", ErrValidation, UsernameMinLength)
 	}
 
-	if _, err := mail.ParseAddress(r.Email); err != nil {
+	if _, err := mail.ParseAddress(i.Email); err != nil {
 		return fmt.Errorf("%w: invalid email address", ErrValidation)
 	}
 
-	if len(r.Password) < PasswordMinLength {
+	if len(i.Password) < PasswordMinLength {
 		return fmt.Errorf("%w: password must be at least %d characters long", ErrValidation, PasswordMinLength)
 	}
 
-	if r.Password != r.ConfirmPassword {
+	if i.Password != i.ConfirmPassword {
 		return fmt.Errorf("%w: password and confirm password must match", ErrValidation)
 	}
 
 	return nil
 }
 
-func (in *RegisterInput) Sanitize() {
-	in.Email = strings.TrimSpace(in.Email)
-	in.Email = strings.ToLower(in.Email)
+func (i RegisterInput) Sanitize() RegisterInput {
+	i.Email = strings.TrimSpace(i.Email)
+	i.Email = strings.ToLower(i.Email)
 
-	in.Username = strings.TrimSpace(in.Username)
+	i.Username = strings.TrimSpace(i.Username)
+	i.Password = strings.TrimSpace(i.Password)
+	i.ConfirmPassword = strings.TrimSpace(i.ConfirmPassword)
+
+	return i
 }

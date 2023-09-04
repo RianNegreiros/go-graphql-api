@@ -22,7 +22,7 @@ func NewAuthService(ur models.UserRepo) *AuthService {
 }
 
 func (as *AuthService) Register(ctx context.Context, input models.RegisterInput) (models.AuthResponse, error) {
-	input.Sanitize()
+	input = input.Sanitize()
 
 	if err := input.Validate(); err != nil {
 		return models.AuthResponse{}, err
@@ -60,7 +60,7 @@ func (as *AuthService) Register(ctx context.Context, input models.RegisterInput)
 }
 
 func (as *AuthService) Login(ctx context.Context, input models.LoginInput) (models.AuthResponse, error) {
-	input.Sanitize()
+	input = input.Sanitize()
 
 	if err := input.Validate(); err != nil {
 		return models.AuthResponse{}, err
