@@ -51,3 +51,29 @@ func TestTokenService_CreateAccessToken(t *testing.T) {
 		require.Equal(t, now.Add(jwt.AccessTokenLifeTime).Unix(), tok.Expiration().Unix())
 	})
 }
+
+func TestTokenService_CreateRefreshToken(t *testing.T) {
+	t.Run("should create refresh token", func(t *testing.T) {
+		ctx := context.Background()
+		user := models.User{
+			ID: "1",
+		}
+
+		token, err := tokenService.CreateRefreshToken(ctx, user, "2")
+		require.NoError(t, err)
+
+		now := time.Now()
+
+		tok, err := jwtGo.Parse(
+			[]byte(token),
+			jwtGo.WithValidate(true),
+			jwtGo.WithIssuer(conf.JWT.Issuer),
+			jwtGo.WithVerify(jwa.HS256, []byte(conf.JWT.Secret)),
+		)
+		require.NoError(t, err)
+
+		require.Equal(t, user.ID, tok.Subject())
+		require.Equal(t, "2", tok.JwtID())
+		require.Equal(t, now.Add(jwt.RefreshTokenLifeTime).Unix(), tok.Expiration().Unix())
+	})
+}
