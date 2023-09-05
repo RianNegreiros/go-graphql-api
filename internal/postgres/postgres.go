@@ -16,6 +16,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
+var migrationPath string
+
 type DB struct {
 	Pool   *pgxpool.Pool
 	config *config.Config
@@ -31,6 +33,14 @@ func New(ctx context.Context, config *config.Config) *DB {
 	if err != nil {
 		log.Fatalf("error connecting to postgres: %v", err)
 	}
+
+	if config.Env.BuildEnv == "docker" {
+		migrationPath = "file://./migrations"
+	}
+
+	_, b, _, _ := runtime.Caller(0)
+
+	migrationPath = fmt.Sprintf("file://%s/migrations", path.Dir(b))
 
 	db := &DB{
 		Pool:   pool,
@@ -55,10 +65,6 @@ func (db *DB) Close() {
 }
 
 func (db *DB) Migrate() error {
-	_, b, _, _ := runtime.Caller(0)
-
-	migrationPath := fmt.Sprintf("file:///%s/migrations", path.Dir(b))
-
 	m, err := migrate.New(migrationPath, db.config.Database.URL)
 	if err != nil {
 		return fmt.Errorf("error creating migration instance: %w", err)
@@ -74,10 +80,6 @@ func (db *DB) Migrate() error {
 }
 
 func (db *DB) Drop() error {
-	_, b, _, _ := runtime.Caller(0)
-
-	migrationPath := fmt.Sprintf("file:///%s/migrations", path.Dir(b))
-
 	m, err := migrate.New(migrationPath, db.config.Database.URL)
 	if err != nil {
 		return fmt.Errorf("error creating migration instance: %w", err)

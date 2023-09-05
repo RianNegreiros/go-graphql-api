@@ -9,6 +9,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
+    networks:
+      - app_net
     volumes:
       - database_postgres:/var/lib/postgresql/data
 
@@ -21,6 +23,24 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: test
 
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres?sslmode=disable
+      DOMAIN: localhost
+      JWT_SECRET: secretstring
+      BUILD_ENV: docker
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - app_net
+
 volumes:
   database_postgres:
     driver: local
+
+networks:
+  app_net:
+    driver: bridge
