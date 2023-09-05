@@ -12,7 +12,9 @@
  <a href="#author">Author</a>
 </p>
 
-<p align="center" id="description">Social Network API based on Twitter using <a href="https://graphql.org">GraphQL</a></p> 
+<p align="center" id="description">Social Network API based on Twitter using <a href="https://graphql.org">GraphQL</a></p>
+
+![schema](_docs/schema.png)
 
 ## Features
 
@@ -50,8 +52,9 @@ make run-docker
 
 #### Requirements
 
-[Golang 1.21](https://go.dev/blog/go1.21)
-[Make](https://www.gnu.org/software/make/#download)
+- [Golang 1.21](https://go.dev/blog/go1.21)
+
+- [Make](https://www.gnu.org/software/make/#download)
 
 1. Setup the postgres database. You can use the docker compose, running:
 
