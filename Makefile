@@ -31,3 +31,6 @@ run:
 
 generate:
 	go generate ./...
+
+run-docker:
+	docker-compose up --build
