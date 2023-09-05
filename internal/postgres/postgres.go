@@ -36,11 +36,10 @@ func New(ctx context.Context, config *config.Config) *DB {
 
 	if config.Env.BuildEnv == "docker" {
 		migrationPath = "file://./migrations"
+	} else {
+		_, b, _, _ := runtime.Caller(0)
+		migrationPath = fmt.Sprintf("file://%s/migrations", path.Dir(b))
 	}
-
-	_, b, _, _ := runtime.Caller(0)
-
-	migrationPath = fmt.Sprintf("file://%s/migrations", path.Dir(b))
 
 	db := &DB{
 		Pool:   pool,
