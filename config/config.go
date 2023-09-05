@@ -16,9 +16,14 @@ type jwt struct {
 	Issuer string
 }
 
+type env struct {
+	BuildEnv string
+}
+
 type Config struct {
 	Database database
 	JWT      jwt
+	Env      env
 }
 
 func LoadEnv(fileName string) {
@@ -40,6 +45,9 @@ func New() *Config {
 		JWT: jwt{
 			Secret: os.Getenv("JWT_SECRET"),
 			Issuer: os.Getenv("DOMAIN"),
+		},
+		Env: env{
+			BuildEnv: os.Getenv("BUILD_ENV"),
 		},
 	}
 }

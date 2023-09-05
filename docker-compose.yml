@@ -29,6 +29,7 @@ services:
       DATABASE_URL: postgres://postgres:postgres@db:5432/postgres?sslmode=disable
       DOMAIN: localhost
       JWT_SECRET: secretstring
+      BUILD_ENV: docker
     ports:
       - "8080:8080"
     depends_on:
