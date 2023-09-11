@@ -52,7 +52,7 @@ make run-docker
 
 #### Requirements
 
-- [Golang 1.21](https://go.dev/blog/go1.21)
+- [Golang](https://go.dev/learn/)
 
 - [Make](https://www.gnu.org/software/make/#download)
 
