@@ -3,7 +3,7 @@
 ![GraphQL](https://img.shields.io/badge/-GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
-<h1 align="center">Social Network API</h1>
+<h1 align="center">Social Network GraphQL API</h1>
 
 <p align="center">
  <a href="#features">Features</a> • 
@@ -52,7 +52,7 @@ make run-docker
 
 #### Requirements
 
-- [Golang](https://go.dev/learn/)
+- [Golang](https://go.dev/doc/install)
 
 - [Make](https://www.gnu.org/software/make/#download)
 
@@ -102,8 +102,8 @@ make test-integration
 
 ### Author
 
-<sub id="author"><b>Rian Negreiros Dos Santos</b></sub></a>
+Rian Negreiros Dos Santos
 
-[![Linkedin Badge](https://img.shields.io/badge/-Rian-blue?style=flat-square&logo=Linkedin&logoColor=white&link=https://www.linkedin.com/in/tgmarinho/)](https://www.linkedin.com/in/riannegreiros/) 
+[![Linkedin Badge](https://img.shields.io/badge/-RianNegreiros-blue?style=flat-square&logo=Linkedin&logoColor=white&link=https://www.linkedin.com/in/tgmarinho/)](https://www.linkedin.com/in/riannegreiros/) 
 
 [![Gmail Badge](https://img.shields.io/badge/-riannegreiros@gmail.com-c14438?style=flat-square&logo=Gmail&logoColor=white&link=mailto:tgmarinho@gmail.com)](mailto:riannegreiros@gmail.com)
