@@ -48,7 +48,7 @@ git clone https://github.com/RianNegreiros/go-graphql-api.git
 make run-docker
 ```
 
-### Or locally
+### Locally
 
 #### Requirements
 
@@ -96,7 +96,7 @@ docker-compose up test_db -d
 make test-integration
 ```
 
-#### Test with Isomnia
+### Test with Insomnia
 
 [![Run in Insomnia}](https://insomnia.rest/images/run.svg)](https://insomnia.rest/run/?label=Go%20GraphQL%20API&uri=https%3A%2F%2Fraw.githubusercontent.com%2FRianNegreiros%2Fgo-graphql-api%2Fmain%2F_docs%2FInsomnia_2023-09-05.json)
 
