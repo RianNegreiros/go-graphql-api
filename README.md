@@ -30,8 +30,6 @@
 
 #### Requirements
 
-- [Docker engine](https://docs.docker.com/engine/install)
-
 - [Docker compose](https://docs.docker.com/compose/install)
 
 - [Make](https://www.gnu.org/software/make/#download)
@@ -46,28 +44,6 @@ git clone https://github.com/RianNegreiros/go-graphql-api.git
 
 ```bash
 make run-docker
-```
-
-### Locally
-
-#### Requirements
-
-- [Golang](https://go.dev/doc/install)
-
-- [Make](https://www.gnu.org/software/make/#download)
-
-1. Setup the postgres database. You can use the docker compose, running:
-
-```bash
-docker-compose up db -d
-```
-
-2. Setup `.env` file
-
-3. Run the tests
-
-```bash
-make run
 ```
 
 Access the GraphQL playground on [localhost:8080](http://localhost:8080)
