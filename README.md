@@ -9,7 +9,6 @@
  <a href="#features">Features</a> • 
  <a href="#how-to-run">How to run</a> • 
  <a href="#tests">Tests</a> • 
- <a href="#author">Author</a>
 </p>
 
 <p align="center" id="description">Social Network API based on Twitter using <a href="https://graphql.org">GraphQL</a></p>
@@ -75,11 +74,3 @@ make test-integration
 ### Manual Tests
 
 [![Run in Insomnia}](https://insomnia.rest/images/run.svg)](https://insomnia.rest/run/?label=Go%20GraphQL%20API&uri=https%3A%2F%2Fraw.githubusercontent.com%2FRianNegreiros%2Fgo-graphql-api%2Fmain%2F_docs%2FInsomnia_2023-09-05.json)
-
-### Author
-
-Rian Negreiros Dos Santos
-
-[![Linkedin Badge](https://img.shields.io/badge/-RianNegreiros-blue?style=flat-square&logo=Linkedin&logoColor=white&link=https://www.linkedin.com/in/tgmarinho/)](https://www.linkedin.com/in/riannegreiros/) 
-
-[![Gmail Badge](https://img.shields.io/badge/-riannegreiros@gmail.com-c14438?style=flat-square&logo=Gmail&logoColor=white&link=mailto:tgmarinho@gmail.com)](mailto:riannegreiros@gmail.com)
