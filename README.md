@@ -8,7 +8,7 @@
 <p align="center">
  <a href="#features">Features</a> • 
  <a href="#how-to-run">How to run</a> • 
- <a href="#tests">Tests</a> • 
+ <a href="#tests">Tests</a>
 </p>
 
 <p align="center" id="description">Social Network API based on Twitter using <a href="https://graphql.org">GraphQL</a></p>
